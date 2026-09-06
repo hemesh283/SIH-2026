@@ -1,0 +1,289 @@
+file_path,file_size,file_type,parent_sequence,recording_type,estimated_sensor_type,row_count,column_count
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/M (Driver B)/S-M.csv,19798721,.csv,M (Driver B),Smartphone,AndroSensor (IMU + GPS),105974,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/M (Driver B)/V-M.csv,22507823,.csv,M (Driver B),Vehicle,Vehicle CAN/ECU (Dynamics + GPS),105974,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S1/S-S1.csv,9631499,.csv,S1,Smartphone,AndroSensor (IMU + GPS),51746,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S1/V-S1.csv,10967129,.csv,S1,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),51746,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S2/S-S2.csv,17469302,.csv,S2,Smartphone,AndroSensor (IMU + GPS),93876,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S2/V-S2.csv,20091681,.csv,S2,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),93876,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S3a/S-S3a.csv,4580130,.csv,S3a,Smartphone,AndroSensor (IMU + GPS),24621,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S3a/V-S3a.csv,5286764,.csv,S3a,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),24621,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S3b/S-S3b.csv,1253565,.csv,S3b,Smartphone,AndroSensor (IMU + GPS),6813,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S3b/V-S3b.csv,1464196,.csv,S3b,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),6813,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S3c/S-S3c.csv,6881631,.csv,S3c,Smartphone,AndroSensor (IMU + GPS),37183,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S3c/V-S3c.csv,7976092,.csv,S3c,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),37183,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S4/S-S4.csv,17574514,.csv,S4,Smartphone,AndroSensor (IMU + GPS),94600,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/S (Driver A)/S4/V-S4.csv,20164189,.csv,S4,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),94600,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vf (Driver E)/V-Vfa01/S-Vfa01.csv,2134667,.csv,V-Vfa01,Smartphone,AndroSensor (IMU + GPS),11486,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vf (Driver E)/V-Vfa01/V-Vfa01.csv,2398099,.csv,V-Vfa01,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),11535,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vf (Driver E)/V-Vfa02/S-Vfa02.csv,12603657,.csv,V-Vfa02,Smartphone,AndroSensor (IMU + GPS),67523,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vf (Driver E)/V-Vfa02/V-Vfa02.csv,13955001,.csv,V-Vfa02,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),67755,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta01a/S-Vta1a.csv,4766740,.csv,Vta01a,Smartphone,AndroSensor (IMU + GPS),25676,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta01a/V-Vta1a.csv,5444513,.csv,Vta01a,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),25676,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta01b/S-Vta1b.csv,178260,.csv,Vta01b,Smartphone,AndroSensor (IMU + GPS),954,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta01b/V-Vta1b.csv,205277,.csv,Vta01b,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),953,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta02/S-Vta2.csv,2038713,.csv,Vta02,Smartphone,AndroSensor (IMU + GPS),10991,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta02/V-vta2.csv,2307461,.csv,Vta02,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),10991,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta03/S-Vta3.csv,116809,.csv,Vta03,Smartphone,AndroSensor (IMU + GPS),645,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta03/V-vta3.csv,137891,.csv,Vta03,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),645,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta04/S-Vta4.csv,331302,.csv,Vta04,Smartphone,AndroSensor (IMU + GPS),1789,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta04/V-vta4.csv,380874,.csv,Vta04,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1789,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta05/S-Vta5.csv,57485,.csv,Vta05,Smartphone,AndroSensor (IMU + GPS),307,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta05/V-vta5.csv,66401,.csv,Vta05,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),307,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta06/S-Vta6.csv,254665,.csv,Vta06,Smartphone,AndroSensor (IMU + GPS),1376,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta06/V-vta6.csv,289249,.csv,Vta06,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1376,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta07/S-Vta7.csv,155360,.csv,Vta07,Smartphone,AndroSensor (IMU + GPS),840,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta07/V-vta7.csv,179784,.csv,Vta07,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),840,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta08/S-Vta8.csv,678900,.csv,Vta08,Smartphone,AndroSensor (IMU + GPS),3676,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta08/V-vta8.csv,753939,.csv,Vta08,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),3676,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta09/S-Vta9.csv,29554,.csv,Vta09,Smartphone,AndroSensor (IMU + GPS),156,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta09/V-vta9.csv,33110,.csv,Vta09,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),156,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta10/S-Vta10.csv,279232,.csv,Vta10,Smartphone,AndroSensor (IMU + GPS),1502,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta10/V-vta10.csv,317921,.csv,Vta10,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1502,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta11/S-Vta11.csv,95272,.csv,Vta11,Smartphone,AndroSensor (IMU + GPS),510,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta11/V-vta11.csv,111690,.csv,Vta11,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),510,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta12/S-Vta12.csv,114418,.csv,Vta12,Smartphone,AndroSensor (IMU + GPS),610,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta12/V-vta12.csv,128904,.csv,Vta12,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),610,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta13/S-Vta13.csv,76217,.csv,Vta13,Smartphone,AndroSensor (IMU + GPS),404,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta13/V-vta13.csv,86963,.csv,Vta13,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),404,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta14/S-Vta14.csv,540523,.csv,Vta14,Smartphone,AndroSensor (IMU + GPS),2885,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta14/V-vta14.csv,612352,.csv,Vta14,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),2885,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta15/S-Vta15.csv,156907,.csv,Vta15,Smartphone,AndroSensor (IMU + GPS),833,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta15/V-vta15.csv,175132,.csv,Vta15,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),833,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta16/S-Vta16.csv,2111083,.csv,Vta16,Smartphone,AndroSensor (IMU + GPS),11335,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta16/V-vta16.csv,2410634,.csv,Vta16,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),11335,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta17/S-Vta17.csv,839635,.csv,Vta17,Smartphone,AndroSensor (IMU + GPS),4519,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta17/V-vta17.csv,972437,.csv,Vta17,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),4519,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta19/S-Vta19.csv,54578,.csv,Vta19,Smartphone,AndroSensor (IMU + GPS),292,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta19/V-vta19.csv,61675,.csv,Vta19,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),292,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta20/S-Vta20.csv,582891,.csv,Vta20,Smartphone,AndroSensor (IMU + GPS),3223,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta20/V-vta20.csv,596090,.csv,Vta20,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),3223,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta21/S-Vta21.csv,388495,.csv,Vta21,Smartphone,AndroSensor (IMU + GPS),2079,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta21/V-vta21.csv,450180,.csv,Vta21,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),2079,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta22/S-Vta22.csv,290331,.csv,Vta22,Smartphone,AndroSensor (IMU + GPS),1564,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta22/V-vta22.csv,338739,.csv,Vta22,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1564,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta23/S-Vta23.csv,206507,.csv,Vta23,Smartphone,AndroSensor (IMU + GPS),1110,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta23/V-vta23.csv,242444,.csv,Vta23,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1110,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta24/S-Vta24.csv,217212,.csv,Vta24,Smartphone,AndroSensor (IMU + GPS),1171,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta24/V-vta24.csv,250448,.csv,Vta24,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1171,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta25/S-Vta25.csv,118562,.csv,Vta25,Smartphone,AndroSensor (IMU + GPS),646,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta25/V-vta25.csv,135915,.csv,Vta25,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),646,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta26/S-Vta26.csv,358553,.csv,Vta26,Smartphone,AndroSensor (IMU + GPS),1935,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta26/V-vta26.csv,401896,.csv,Vta26,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1935,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta27/S-Vta27.csv,471023,.csv,Vta27,Smartphone,AndroSensor (IMU + GPS),2540,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta27/V-vta27.csv,550395,.csv,Vta27,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),2540,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta28/S-Vta28.csv,781902,.csv,Vta28,Smartphone,AndroSensor (IMU + GPS),4210,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta28/V-vta28.csv,901238,.csv,Vta28,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),4210,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta29/S-Vta29.csv,4387027,.csv,Vta29,Smartphone,AndroSensor (IMU + GPS),23705,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta29/V-vta29.csv,5117097,.csv,Vta29,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),23705,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta30/S-Vta30.csv,3175640,.csv,Vta30,Smartphone,AndroSensor (IMU + GPS),17136,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vta (Driver E)/Vta30/V-vta30.csv,3628928,.csv,Vta30,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),17136,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb01/S-Vtb1.csv,6052896,.csv,Vtb01,Smartphone,AndroSensor (IMU + GPS),32459,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb01/V-vtb1.csv,6989783,.csv,Vtb01,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),32459,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb02/S-Vtb2.csv,1053029,.csv,Vtb02,Smartphone,AndroSensor (IMU + GPS),5712,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb02/V-vtb2.csv,1200565,.csv,Vtb02,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),5712,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb03/S-Vtb3.csv,1530275,.csv,Vtb03,Smartphone,AndroSensor (IMU + GPS),8240,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb03/V-vtb3.csv,1739502,.csv,Vtb03,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),8240,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb04/S-Vtb4.csv,103090,.csv,Vtb04,Smartphone,AndroSensor (IMU + GPS),556,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb04/V-vtb4.csv,118374,.csv,Vtb04,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),556,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb05/S-Vtb5.csv,12010333,.csv,Vtb05,Smartphone,AndroSensor (IMU + GPS),64388,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb05/V-vtb5.csv,13567208,.csv,Vtb05,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),64388,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb06/S-Vtb6.csv,94210,.csv,Vtb06,Smartphone,AndroSensor (IMU + GPS),498,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb06/V-vtb6.csv,105659,.csv,Vtb06,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),498,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb07/S-Vtb7.csv,87349,.csv,Vtb07,Smartphone,AndroSensor (IMU + GPS),461,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb07/V-vtb7.csv,101086,.csv,Vtb07,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),461,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb08/S-Vtb8.csv,126023,.csv,Vtb08,Smartphone,AndroSensor (IMU + GPS),668,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb08/V-vtb8.csv,138162,.csv,Vtb08,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),668,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb09/S-Vtb9.csv,85640,.csv,Vtb09,Smartphone,AndroSensor (IMU + GPS),452,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb09/V-vtb9.csv,93354,.csv,Vtb09,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),452,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb10/S-Vtb10.csv,37176,.csv,Vtb10,Smartphone,AndroSensor (IMU + GPS),196,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb10/V-vtb10.csv,42725,.csv,Vtb10,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),195,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb11/S-Vtb11.csv,68659,.csv,Vtb11,Smartphone,AndroSensor (IMU + GPS),361,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb11/V-vtb11.csv,74838,.csv,Vtb11,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),361,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb12/S-Vtb12.csv,83892,.csv,Vtb12,Smartphone,AndroSensor (IMU + GPS),447,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vtb (Driver E)/Vtb12/V-vtb12.csv,94747,.csv,Vtb12,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),447,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw01/S-Vw1.csv,3524952,.csv,Vw01,Smartphone,AndroSensor (IMU + GPS),20476,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw01/V-Vw1.csv,4001856,.csv,Vw01,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),20475,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw02/S-Vw2.csv,9883172,.csv,Vw02,Smartphone,AndroSensor (IMU + GPS),52713,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw02/V-Vw2.csv,11341576,.csv,Vw02,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),52712,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw03/S-Vw3.csv,720455,.csv,Vw03,Smartphone,AndroSensor (IMU + GPS),3861,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw03/V-Vw3.csv,839545,.csv,Vw03,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),3861,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw04/S-Vw4.csv,23607418,.csv,Vw04,Smartphone,AndroSensor (IMU + GPS),126526,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw04/V-Vw4.csv,27124526,.csv,Vw04,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),126527,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw05/S-Vw5.csv,188883,.csv,Vw05,Smartphone,AndroSensor (IMU + GPS),1012,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw05/V-Vw5.csv,216316,.csv,Vw05,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1012,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw06/S-Vw6.csv,238315,.csv,Vw06,Smartphone,AndroSensor (IMU + GPS),1281,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw06/V-Vw6.csv,278191,.csv,Vw06,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1281,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw07/S-Vw7.csv,300843,.csv,Vw07,Smartphone,AndroSensor (IMU + GPS),1602,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw07/V-Vw7.csv,346895,.csv,Vw07,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1602,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw08/S-Vw8.csv,287123,.csv,Vw08,Smartphone,AndroSensor (IMU + GPS),1529,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw08/V-Vw8.csv,332609,.csv,Vw08,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1529,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw09/S-Vw9.csv,103572,.csv,Vw09,Smartphone,AndroSensor (IMU + GPS),552,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw09/V-Vw9.csv,121383,.csv,Vw09,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),553,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw10/S-Vw10.csv,123092,.csv,Vw10,Smartphone,AndroSensor (IMU + GPS),652,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw10/V-Vw10.csv,141457,.csv,Vw10,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),652,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw11/S-Vw11.csv,924189,.csv,Vw11,Smartphone,AndroSensor (IMU + GPS),4909,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw11/V-Vw11.csv,1032515,.csv,Vw11,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),4909,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw12/S-Vw12.csv,170958,.csv,Vw12,Smartphone,AndroSensor (IMU + GPS),918,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw12/V-Vw12.csv,188273,.csv,Vw12,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),918,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw13/S-Vw13.csv,53041,.csv,Vw13,Smartphone,AndroSensor (IMU + GPS),284,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw13/V-Vw13.csv,59207,.csv,Vw13,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),284,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw14a/S-Vw14a.csv,585872,.csv,Vw14a,Smartphone,AndroSensor (IMU + GPS),3138,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw14a/V-Vw14a.csv,651054,.csv,Vw14a,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),3138,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw14b/S-Vw14b.csv,3668924,.csv,Vw14b,Smartphone,AndroSensor (IMU + GPS),19588,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw14b/V-Vw14b.csv,4120915,.csv,Vw14b,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),19588,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw14c/S-Vw14c.csv,2957471,.csv,Vw14c,Smartphone,AndroSensor (IMU + GPS),15826,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw14c/V-Vw14c.csv,3363425,.csv,Vw14c,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),15826,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw15/S-Vw15.csv,254039,.csv,Vw15,Smartphone,AndroSensor (IMU + GPS),1380,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw15/V-Vw15.csv,263885,.csv,Vw15,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1391,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw16a/S-Vw16a.csv,1100323,.csv,Vw16a,Smartphone,AndroSensor (IMU + GPS),5879,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw16a/V-Vw16a.csv,1241037,.csv,Vw16a,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),5879,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw16b/S-Vw16b.csv,211892,.csv,Vw16b,Smartphone,AndroSensor (IMU + GPS),1126,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw16b/V-Vw16b.csv,239979,.csv,Vw16b,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1126,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw17/S-Vw17.csv,62489,.csv,Vw17,Smartphone,AndroSensor (IMU + GPS),329,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Vw (Driver E)/Vw17/V-Vw17.csv,71065,.csv,Vw17,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),329,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Y (Driver D)/Y1/S-Y1.csv,13039543,.csv,Y1,Smartphone,AndroSensor (IMU + GPS),70285,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/Y (Driver D)/Y1/V-Y1.csv,14986075,.csv,Y1,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),70285,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-M.csv,19798716,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),105974,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-S1.csv,10011984,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),51746,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-S2.csv,17469297,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),93876,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-S3a.csv,4730156,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),24621,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-S3b.csv,1297427,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),6813,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-S3c.csv,7158727,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),37183,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-S4.csv,17574509,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),94600,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vfa01.csv,2134661,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),11486,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vfa02.csv,12603651,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),67523,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta10.csv,296597,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1502,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta11.csv,99409,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),510,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta12.csv,119914,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),610,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta13.csv,79167,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),404,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta14.csv,578774,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),2885,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta15.csv,166282,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),833,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta16.csv,2231230,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),11335,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta17.csv,897277,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),4519,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta19.csv,55537,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),292,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta1a.csv,4766735,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),25676,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta1b.csv,188978,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),954,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta2.csv,2149518,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),10991,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta20.csv,608133,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),3223,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta21.csv,414878,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),2079,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta22.csv,308800,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1564,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta23.csv,222406,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1110,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta24.csv,236619,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1171,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta25.csv,127720,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),646,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta26.csv,387222,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1935,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta27.csv,502320,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),2540,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta28.csv,842776,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),4210,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta29.csv,4387022,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),23705,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta3.csv,123424,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),645,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta30.csv,3175635,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),17136,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta4.csv,349178,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1789,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta5.csv,60433,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),307,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta6.csv,272232,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1376,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta7.csv,164330,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),840,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta8.csv,723761,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),3676,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vta9.csv,31642,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),156,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb1.csv,6052891,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),32459,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb10.csv,38686,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),196,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb11.csv,70204,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),361,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb12.csv,87659,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),447,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb2.csv,1053024,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),5712,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb3.csv,1530270,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),8240,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb4.csv,111008,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),556,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb5.csv,12612030,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),64388,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb6.csv,99549,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),498,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb7.csv,90646,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),461,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb8.csv,131319,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),668,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vtb9.csv,89626,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),452,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw1.csv,3524947,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),20476,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw10.csv,129358,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),652,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw11.csv,964445,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),4909,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw12.csv,176321,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),918,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw13.csv,54886,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),284,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw14a.csv,608561,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),3138,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw14b.csv,3869411,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),19588,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw14c.csv,3129600,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),15826,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw15.csv,268621,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1380,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw16a.csv,1152501,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),5879,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw16b.csv,221088,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1126,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw17.csv,65869,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),329,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw2.csv,9883167,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),52713,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw3.csv,754118,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),3861,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw4.csv,23607413,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),126526,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw5.csv,194565,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1012,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw6.csv,246923,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1281,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw7.csv,313333,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1602,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw8.csv,297380,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),1529,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Vw9.csv,106439,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),552,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/S-Dataset/S-Y1.csv,13039538,.csv,S-Dataset,Smartphone,AndroSensor (IMU + GPS),70285,24
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-M.csv,22507823,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),105974,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-S1.csv,10967129,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),51746,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-S2.csv,20091681,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),93876,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-S3a.csv,5286764,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),24621,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-S3b.csv,1464196,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),6813,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-S3c.csv,7976092,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),37183,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-S4.csv,20164189,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),94600,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vfa01.csv,2398099,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),11535,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vfa02.csv,13955001,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),67755,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta10.csv,317921,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1502,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta11.csv,111690,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),510,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta12.csv,128904,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),610,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta13.csv,86963,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),404,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta14.csv,612352,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),2885,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta15.csv,175132,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),833,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta16.csv,2410634,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),11335,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta17.csv,972437,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),4519,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta19.csv,61675,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),292,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vta1a.csv,5444513,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),25676,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vta1b.csv,205277,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),953,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta2.csv,2307461,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),10991,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta20.csv,596090,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),3223,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta21.csv,450180,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),2079,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta22.csv,338739,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1564,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta23.csv,242444,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1110,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta24.csv,250448,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1171,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta25.csv,135915,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),646,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta26.csv,401896,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1935,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta27.csv,550395,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),2540,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta28.csv,901238,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),4210,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta29.csv,5117097,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),23705,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta3.csv,137891,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),645,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta30.csv,3628928,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),17136,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta4.csv,380874,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1789,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta5.csv,66401,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),307,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta6.csv,289249,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1376,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta7.csv,179784,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),840,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta8.csv,753939,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),3676,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vta9.csv,33110,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),156,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb1.csv,6989783,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),32459,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb10.csv,42725,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),195,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb11.csv,74838,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),361,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb12.csv,94747,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),447,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb2.csv,1200565,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),5712,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb3.csv,1739502,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),8240,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb4.csv,118374,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),556,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb5.csv,13567208,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),64388,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb6.csv,105659,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),498,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb7.csv,101086,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),461,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb8.csv,138162,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),668,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-vtb9.csv,93354,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),452,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw1.csv,4001856,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),20475,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw10.csv,141457,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),652,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw11.csv,1032515,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),4909,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw12.csv,188273,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),918,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw13.csv,59207,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),284,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw14a.csv,651054,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),3138,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw14b.csv,4120915,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),19588,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw14c.csv,3363425,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),15826,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw15.csv,263885,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1391,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw16a.csv,1241037,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),5879,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw16b.csv,239979,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1126,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw17.csv,71065,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),329,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw2.csv,11341576,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),52712,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw3.csv,839545,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),3861,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw4.csv,27124526,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),126527,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw5.csv,216316,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1012,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw6.csv,278191,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1281,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw7.csv,346895,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1602,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw8.csv,332609,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),1529,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Vw9.csv,121383,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),553,29
+data/raw/IO-VNBD/Synchronised V abd S datasets/Uncategorised IOVNB Dataset/V-Dataset/V-Y1.csv,14986075,.csv,V-Dataset,Vehicle,Vehicle CAN/ECU (Dynamics + GPS),70285,29

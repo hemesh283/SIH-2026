@@ -1,0 +1,58 @@
+{
+  "dataset": "IO-VNBD Native 10Hz",
+  "window_size": 20,
+  "feature_names": [
+    "acc_x",
+    "acc_y",
+    "acc_z",
+    "gyro_x",
+    "gyro_y",
+    "gyro_z"
+  ],
+  "feature_units": [
+    "g",
+    "g",
+    "g",
+    "rad/s",
+    "rad/s",
+    "rad/s"
+  ],
+  "mean": [
+    0.0027463287115097046,
+    -0.012979637831449509,
+    0.0025934220757335424,
+    0.0010569283040240407,
+    -0.0013110938016325235,
+    -0.0013259544502943754
+  ],
+  "std": [
+    0.21921990811824799,
+    0.20646202564239502,
+    0.093095563352108,
+    0.3022365868091583,
+    0.1888296902179718,
+    0.11095237731933594
+  ],
+  "target_names": [
+    "dx",
+    "dy",
+    "dz"
+  ],
+  "target_units": [
+    "m",
+    "m",
+    "m"
+  ],
+  "target_mean": [
+    26.469011306762695,
+    0.019715862348675728,
+    0.0
+  ],
+  "target_std": [
+    16.954994201660156,
+    1.4200412034988403,
+    1.0
+  ],
+  "training_windows_count": 45742,
+  "notes": "Computed strictly on train split without validation/test data leakage."
+}

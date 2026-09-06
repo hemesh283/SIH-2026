@@ -1,0 +1,73 @@
+{
+  "model_name": "GRUDeadReckoning",
+  "model_version": "1.0.0",
+  "framework": "PyTorch 2.14.0",
+  "deployment_format": [
+    "PyTorch (.pt)",
+    "ONNX (.onnx)"
+  ],
+  "input_shape": [
+    1,
+    200,
+    6
+  ],
+  "batch_input_shape": [
+    "batch",
+    200,
+    6
+  ],
+  "output_shape": [
+    3
+  ],
+  "batch_output_shape": [
+    "batch",
+    3
+  ],
+  "feature_names": [
+    "acc_x",
+    "acc_y",
+    "acc_z",
+    "gyro_x",
+    "gyro_y",
+    "gyro_z"
+  ],
+  "feature_units": {
+    "acc_x": "g (linear acceleration, gravity-removed, 1g = 9.80665 m/s^2)",
+    "acc_y": "g (linear acceleration, gravity-removed, 1g = 9.80665 m/s^2)",
+    "acc_z": "g (linear acceleration, gravity-removed, 1g = 9.80665 m/s^2)",
+    "gyro_x": "rad/s (angular velocity)",
+    "gyro_y": "rad/s (angular velocity)",
+    "gyro_z": "rad/s (angular velocity)"
+  },
+  "window_size": 200,
+  "window_duration_seconds": 2.0,
+  "sampling_frequency_hz": 100,
+  "stride": 200,
+  "normalization_file": "models/normalization.json",
+  "normalization_npz": "models/gru_local_normalization.npz",
+  "model_file": "models/gru_local_best.pt",
+  "onnx_model_file": "models/gru_local.onnx",
+  "output_type": "local_frame_displacement",
+  "output_names": [
+    "dx",
+    "dy",
+    "dz"
+  ],
+  "output_units": "meters (m)",
+  "output_coordinate_frame": "initial_window_body_frame (R_start^T * delta_p_global)",
+  "architecture": {
+    "model_class": "GRUDeadReckoning",
+    "input_size": 6,
+    "hidden_size": 64,
+    "num_layers": 2,
+    "dropout": 0.2,
+    "output_size": 3
+  },
+  "training_details": {
+    "dataset": "Oxford Inertial Odometry Dataset (OxIOD 2.0) Handheld",
+    "best_epoch": 19,
+    "total_epochs": 20,
+    "best_val_loss_normalized": 0.08390503606669898,
+    "random_seed": 42
+  }
+}

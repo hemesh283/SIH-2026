@@ -1,0 +1,19 @@
+{
+  "onnx_path": "D:\\dead_reckoning\\models\\gru_io_vnbd.onnx",
+  "input_shape": [
+    "batch",
+    20,
+    6
+  ],
+  "output_shape": [
+    "batch",
+    3
+  ],
+  "max_abs_diff": 1.1920928955078125e-06,
+  "mean_abs_diff": 9.243539267345113e-08,
+  "rmse_diff": 1.545871697317125e-07,
+  "mean_latency_ms": 0.1774652000003698,
+  "median_latency_ms": 0.15910000001895241,
+  "p95_latency_ms": 0.231959999700848,
+  "inferences_per_sec": 5634.907576234193
+}

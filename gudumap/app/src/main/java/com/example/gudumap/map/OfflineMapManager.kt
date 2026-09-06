@@ -1,0 +1,232 @@
+package com.example.gudumap.map
+
+import android.content.Context
+import android.database.sqlite.SQLiteDatabase
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.util.Log
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.MapTileProviderArray
+import org.osmdroid.tileprovider.modules.ArchiveFileFactory
+import org.osmdroid.tileprovider.modules.IArchiveFile
+import org.osmdroid.tileprovider.modules.MBTilesFileArchive
+import org.osmdroid.tileprovider.modules.MapTileFileArchiveProvider
+import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase
+import org.osmdroid.tileprovider.tilesource.ITileSource
+import org.osmdroid.tileprovider.tilesource.XYTileSource
+import org.osmdroid.tileprovider.util.SimpleRegisterReceiver
+import org.osmdroid.util.BoundingBox
+import org.osmdroid.util.GeoPoint
+import java.io.File
+import java.io.FileOutputStream
+
+enum class OfflineMapStatus {
+    AVAILABLE,
+    LOADING,
+    ERROR,
+    NOT_AVAILABLE
+}
+
+class OfflineMapManager(private val context: Context) {
+
+    companion object {
+        private const val TAG = "Gudumap:OfflineMap"
+        const val COIMBATORE_DEFAULT_LAT = 11.0168
+        const val COIMBATORE_DEFAULT_LON = 76.9558
+
+        const val MIN_ZOOM = 11
+        const val MAX_ZOOM = 17
+
+        // Bounding box for Coimbatore metropolitan area (23.3 km x 20.7 km, ~482 sq km)
+        val COIMBATORE_BOUNDS = BoundingBox(11.125, 77.070, 10.915, 76.880)
+        val COIMBATORE_CENTER = GeoPoint(COIMBATORE_DEFAULT_LAT, COIMBATORE_DEFAULT_LON)
+    }
+
+    var status: OfflineMapStatus = OfflineMapStatus.LOADING
+        private set
+
+    private var localMapFile: File? = null
+    private var tileCount: Int = 0
+
+    init {
+        configureOsmdroid()
+        initializeOfflineMap()
+    }
+
+    private fun configureOsmdroid() {
+        try {
+            Configuration.getInstance().load(
+                context,
+                context.getSharedPreferences("gudumap_osmdroid_prefs", Context.MODE_PRIVATE)
+            )
+            Configuration.getInstance().userAgentValue = "Gudumap/1.0 (Android; Offline-Coimbatore)"
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to configure osmdroid: ${e.message}")
+        }
+    }
+
+    /**
+     * Initializes the offline map dataset:
+     * 1. Locates or creates the internal storage directory: context.filesDir/maps/coimbatore/
+     * 2. Copies coimbatore.mbtiles from APK assets on first run or when updated
+     * 3. Verifies SQLite integrity and tile counts
+     * 4. Updates status to AVAILABLE, ERROR, or NOT_AVAILABLE
+     */
+    @Synchronized
+    fun initializeOfflineMap() {
+        status = OfflineMapStatus.LOADING
+        try {
+            val mapsDir = File(context.filesDir, "maps/coimbatore")
+            if (!mapsDir.exists()) mapsDir.mkdirs()
+
+            val targetFile = File(mapsDir, "coimbatore.mbtiles")
+
+            // Determine if asset exists
+            val assetPath = try {
+                context.assets.open("maps/coimbatore/coimbatore.mbtiles").close()
+                "maps/coimbatore/coimbatore.mbtiles"
+            } catch (e: Exception) {
+                try {
+                    context.assets.open("maps/coimbatore.mbtiles").close()
+                    "maps/coimbatore.mbtiles"
+                } catch (e2: Exception) {
+                    null
+                }
+            }
+
+            if (assetPath == null && !targetFile.exists()) {
+                Log.e(TAG, "Offline map asset not found in assets/maps/")
+                status = OfflineMapStatus.NOT_AVAILABLE
+                return
+            }
+
+            // Copy from asset if target doesn't exist or size is 0
+            if (assetPath != null && (!targetFile.exists() || targetFile.length() == 0L)) {
+                Log.i(TAG, "First installation: Copying offline Coimbatore map from $assetPath to ${targetFile.absolutePath}...")
+                context.assets.open(assetPath).use { input ->
+                    FileOutputStream(targetFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                Log.i(TAG, "Extracted offline map successfully (${targetFile.length() / (1024 * 1024)} MB).")
+            }
+
+            localMapFile = targetFile
+
+            // Verify SQLite integrity
+            if (targetFile.exists() && targetFile.length() > 0L) {
+                val isValid = verifyDatabase(targetFile)
+                if (isValid) {
+                    status = OfflineMapStatus.AVAILABLE
+                    Log.i(TAG, "Offline Coimbatore map is AVAILABLE. Tile count = $tileCount, size = ${targetFile.length() / (1024 * 1024)} MB.")
+                } else {
+                    status = OfflineMapStatus.ERROR
+                    Log.e(TAG, "Offline map file exists but verification failed.")
+                }
+            } else {
+                status = OfflineMapStatus.NOT_AVAILABLE
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing offline map: ${e.message}", e)
+            status = OfflineMapStatus.ERROR
+        }
+    }
+
+    private fun verifyDatabase(file: File): Boolean {
+        var db: SQLiteDatabase? = null
+        return try {
+            db = SQLiteDatabase.openDatabase(file.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
+            val cursor = db.rawQuery("SELECT COUNT(*) FROM tiles", null)
+            var count = 0
+            if (cursor.moveToFirst()) {
+                count = cursor.getInt(0)
+            }
+            cursor.close()
+            tileCount = count
+            count > 0
+        } catch (e: Exception) {
+            Log.e(TAG, "SQLite validation error: ${e.message}", e)
+            false
+        } finally {
+            try { db?.close() } catch (_: Exception) {}
+        }
+    }
+
+    fun getLocalMapFile(): File? = localMapFile
+
+    fun getTileCount(): Int = tileCount
+
+    fun isOfflineMapAvailable(): Boolean = status == OfflineMapStatus.AVAILABLE
+
+    /**
+     * Creates an offline-only MapTileProviderArray backed by the local MBTiles archive.
+     * This provider contains NO network downloader modules and enforces offline rendering.
+     */
+    fun createOfflineTileProvider(): MapTileProviderArray? {
+        val file = localMapFile ?: return null
+        if (!file.exists()) return null
+
+        return try {
+            val archive: IArchiveFile? = try {
+                MBTilesFileArchive.getDatabaseFileArchive(file)
+            } catch (e: Exception) {
+                ArchiveFileFactory.getArchiveFile(file)
+            }
+
+            if (archive == null) {
+                Log.e(TAG, "Could not create IArchiveFile from ${file.absolutePath}")
+                return null
+            }
+
+            archive.setIgnoreTileSource(true)
+
+            val offlineTileSource: ITileSource = XYTileSource(
+                "CoimbatoreOffline",
+                MIN_ZOOM,
+                MAX_ZOOM,
+                256,
+                ".png",
+                emptyArray()
+            )
+
+            val receiver = SimpleRegisterReceiver(context)
+            val archiveProvider = MapTileFileArchiveProvider(
+                receiver,
+                offlineTileSource,
+                arrayOf(archive),
+                true
+            )
+
+            MapTileProviderArray(
+                offlineTileSource,
+                receiver,
+                arrayOf<MapTileModuleProviderBase>(archiveProvider)
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating offline tile provider: ${e.message}", e)
+            null
+        }
+    }
+
+    fun isOnline(): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+        val network = cm.activeNetwork ?: return false
+        val capabilities = cm.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
+
+    fun getMapStatus(blackoutMode: Boolean = true): String {
+        return "OFFLINE"
+    }
+
+    fun getOfflineMapStatusString(): String {
+        return when (status) {
+            OfflineMapStatus.AVAILABLE -> "AVAILABLE"
+            OfflineMapStatus.LOADING -> "LOADING"
+            OfflineMapStatus.ERROR -> "ERROR"
+            OfflineMapStatus.NOT_AVAILABLE -> "NOT_AVAILABLE"
+        }
+    }
+}

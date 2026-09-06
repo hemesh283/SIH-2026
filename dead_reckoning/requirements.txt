@@ -1,0 +1,13 @@
+# Dead Reckoning - Machine Learning & Deployment Dependencies
+
+# Core Scientific Computing & Deep Learning
+torch>=2.0.0
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+matplotlib>=3.7.0
+
+# ONNX Deployment & Runtime Layer
+onnx>=1.16.0
+onnxruntime>=1.16.0
+onnxscript>=0.7.0

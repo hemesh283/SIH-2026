@@ -1,0 +1,79 @@
+# =============================================================================
+# SIH26168 monorepo .gitignore — covers gudumap/ (Android), SIH26168-DeadReckoning/
+# and dead_reckoning/ (both Python). Written after auditing actual file sizes on
+# disk (see docs/PROJECT_STATUS.md for the full audit) — nothing here is guessed.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Android / Gradle (gudumap/, and the stale nested copy under dead_reckoning/FE/)
+# Unanchored on purpose: matches at any depth, so it also covers the embedded
+# FE/gudumap/gudumap/ Android project copy without needing a separate entry.
+# Confirmed regenerable build output, not source: gudumap/app/build/ alone is
+# ~272MB on this machine (dex, apk, merged native libs, compressed assets) and
+# includes a 47.5MB app-debug.apk; the FE/ copy's own build/ has a 78.8MB apk.
+# -----------------------------------------------------------------------------
+build/
+.gradle/
+.kotlin/
+.cxx/
+captures/
+*.apk
+*.aab
+*.iml
+.idea/
+local.properties
+
+# -----------------------------------------------------------------------------
+# Python (dead_reckoning/, SIH26168-DeadReckoning/)
+# .venv folders confirmed present at dead_reckoning/.venv and
+# SIH26168-DeadReckoning/backend/.venv — full installed environments (hundreds
+# of packages each), including at least one single file over 37MB
+# (_duckdb.cp313-win_amd64.pyd). Never belongs in git; each teammate creates
+# their own via `pip install -r requirements.txt`.
+# -----------------------------------------------------------------------------
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# -----------------------------------------------------------------------------
+# Large raw datasets and archives — excluded because of real, measured size,
+# not policy:
+#   /dead_reckoning.zip                              -> 2.83 GB (!) -- an
+#     apparent full backup/transfer archive of the whole dead_reckoning/
+#     folder, sitting at the repo root. By far the single largest file in
+#     this entire tree — 28x GitHub's 100MB hard block on its own.
+#   dead_reckoning/data/raw/                         -> 3.8 GB total
+#     (OxIOD extracted: 2.9 GB, IO-VNBD extracted: 865 MB)
+#   dead_reckoning/Oxford Inertial Odometry Dataset_2.0.zip -> 955 MB (single
+#     file; GitHub hard-blocks any single file over 100 MB, this is ~10x that)
+# These are PUBLISHED, downloadable datasets (or a redundant archive of files
+# already present elsewhere in this tree), not something that needs to travel
+# with the repo — see docs/PROJECT_STATUS.md for exact download instructions
+# (OxIOD: http://deepio.cs.ox.ac.uk/, IO-VNBD: https://github.com/onyekpeu/IO-VNBD).
+# If your clone is missing data/raw/ or dead_reckoning.zip, that's expected.
+# -----------------------------------------------------------------------------
+/dead_reckoning.zip
+dead_reckoning/data/raw/
+dead_reckoning/*.zip
+
+# Same category, pre-emptively: this project's own data/README.md already
+# recommends never committing raw downloaded datasets or self-collected traces
+# here. Currently these two folders hold nothing but their own README — keep
+# the README trackable, ignore anything anyone drops in alongside it later.
+SIH26168-DeadReckoning/data/public_datasets/*
+!SIH26168-DeadReckoning/data/public_datasets/README.md
+SIH26168-DeadReckoning/data/raw_traces/*
+!SIH26168-DeadReckoning/data/raw_traces/README.md
+
+# -----------------------------------------------------------------------------
+# OS junk
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
