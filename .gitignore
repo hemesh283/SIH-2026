@@ -62,6 +62,14 @@ __pycache__/
 dead_reckoning/data/raw/
 dead_reckoning/*.zip
 
+# Same category: a teammate's zipped local project state (couldn't `git push` while
+# traveling, so sent a zip instead -- PROJECT_STATUS.md §26). Extracted here purely as a
+# local reference for diffing across several sessions' merge work, never meant to be
+# committed. The zip itself is 337MB on its own -- 3.4x GitHub's 100MB hard block -- and
+# accidentally got swept into a commit via a broad `git add` once already (§31).
+/teammate_version/
+/SIH-2026-main*.zip
+
 # Same category, pre-emptively: this project's own data/README.md already
 # recommends never committing raw downloaded datasets or self-collected traces
 # here. Currently these two folders hold nothing but their own README — keep

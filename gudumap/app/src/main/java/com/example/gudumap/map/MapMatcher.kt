@@ -115,6 +115,18 @@ class MapMatcher(context: Context? = null) {
                 val p1 = points[i]
                 val p2 = points[i + 1]
 
+                // Fast spatial bounding box filter (~200m latitude/longitude threshold) --
+                // merged back from teammate's branch, PROJECT_STATUS.md §26. Cheaply skips
+                // segments nowhere near the estimated position before the more expensive
+                // projection/distance math below -- addresses the brute-force-scan performance
+                // concern flagged in §16 (no spatial index, linear scan over every road segment).
+                if (abs(p1.lat - estimatedLat) > 0.002 && abs(p2.lat - estimatedLat) > 0.002) {
+                    continue
+                }
+                if (abs(p1.lon - estimatedLon) > 0.002 && abs(p2.lon - estimatedLon) > 0.002) {
+                    continue
+                }
+
                 val proj = projectPointOntoSegment(estimatedLat, estimatedLon, p1.lat, p1.lon, p2.lat, p2.lon)
                 val dist = distanceBetweenMeters(estimatedLat, estimatedLon, proj.lat, proj.lon)
 

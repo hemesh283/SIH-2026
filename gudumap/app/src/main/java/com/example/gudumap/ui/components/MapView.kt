@@ -3,13 +3,39 @@ package com.example.gudumap.ui.components
 import android.content.Context
 import android.graphics.Color as AndroidColor
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.gudumap.R
@@ -39,224 +65,402 @@ fun MapView(
     naiveLatitude: Double = latitude,
     naiveLongitude: Double = longitude,
     uncertaintyRadiusMeters: Double = 0.0,
+    isExpanded: Boolean = false,
+    isDarkMode: Boolean = false,
+    onToggleExpand: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    // Trails and blackout-transition tracking live at composable scope so they survive
-    // recomposition but reset cleanly on a fresh blackout (mirrors DeadReckoningEngine
-    // resetting NaiveIntegrator on setBlackoutMode(true)).
     val correctedTrail = remember { mutableListOf<GeoPoint>() }
     val naiveTrail = remember { mutableListOf<GeoPoint>() }
     val wasBlackout = remember { mutableStateOf(false) }
-    AndroidView(
+
+    var osmMapRef by remember { mutableStateOf<OsmMapView?>(null) }
+
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(320.dp),
-        factory = { context: Context ->
-            val offlineManager = OfflineMapManager(context)
-            val tileProvider = offlineManager.createOfflineTileProvider()
+            .then(if (isExpanded) Modifier.fillMaxSize() else Modifier.height(340.dp))
+            .clip(RoundedCornerShape(if (isExpanded) 0.dp else 20.dp))
+            .border(
+                if (isExpanded) 0.dp else 1.dp,
+                if (isDarkMode) Color(0xFF334155) else Color(0xFFE2E8F0),
+                RoundedCornerShape(if (isExpanded) 0.dp else 20.dp)
+            )
+    ) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { context: Context ->
+                org.osmdroid.config.Configuration.getInstance().tileFileSystemCacheMaxBytes = 100L * 1024L * 1024L
+                org.osmdroid.config.Configuration.getInstance().tileFileSystemCacheTrimBytes = 80L * 1024L * 1024L
 
-            val mapView = if (tileProvider != null) {
-                Log.i(TAG, "Offline tile provider ready (status=${offlineManager.getOfflineMapStatusString()}, " +
-                    "tiles=${offlineManager.getTileCount()}) -- using bundled coimbatore.mbtiles")
-                OsmMapView(context, tileProvider)
-            } else {
-                // STRICT OFFLINE (§21 fix): this branch previously constructed a bare
-                // OsmMapView(context), which falls back to osmdroid's own built-in default
-                // tile source -- an ONLINE provider. That's what was actually reaching the
-                // network and rendering a "API KEY REQUIRED" Carto watermark instead of the
-                // bundled offline map: the offline archive failed to load (see the logged
-                // reason below / OfflineMapManager's own Log.e calls for why), and nothing
-                // stopped the fallback from being network-capable. Never let that happen
-                // again regardless of why the offline archive failed: explicitly assign a
-                // tile source with zero base URLs, so there is no address for osmdroid to
-                // even construct a network request from.
-                Log.w(TAG, "Offline tile provider unavailable (status=${offlineManager.getOfflineMapStatusString()}) " +
-                    "-- rendering with no base tiles; NOT falling back to any online source")
-                val noNetworkSource: ITileSource = XYTileSource(
-                    "GudumapNoNetwork",
-                    OfflineMapManager.MIN_ZOOM,
-                    OfflineMapManager.MAX_ZOOM,
-                    256,
-                    ".png",
-                    emptyArray()
-                )
-                OsmMapView(context).apply {
-                    setTileSource(noNetworkSource)
+                val offlineManager = OfflineMapManager(context)
+                val tileProvider = offlineManager.createOfflineTileProvider()
+
+                val mapView = if (tileProvider != null) {
+                    Log.i(TAG, "Offline tile provider ready (status=${offlineManager.getOfflineMapStatusString()}, " +
+                        "tiles=${offlineManager.getTileCount()}) -- using bundled coimbatore.mbtiles")
+                    OsmMapView(context, tileProvider)
+                } else {
+                    Log.w(TAG, "Offline tile provider unavailable (status=${offlineManager.getOfflineMapStatusString()}) " +
+                        "-- rendering with no base tiles; NOT falling back to any online source")
+                    val noNetworkSource: ITileSource = XYTileSource(
+                        "GudumapNoNetwork",
+                        OfflineMapManager.MIN_ZOOM,
+                        OfflineMapManager.MAX_ZOOM,
+                        256,
+                        ".png",
+                        emptyArray()
+                    )
+                    OsmMapView(context).apply {
+                        setTileSource(noNetworkSource)
+                    }
                 }
-            }
 
-            mapView.apply {
-                setMultiTouchControls(true)
-                // STRICT OFFLINE: Disable all network data connections
-                setUseDataConnection(false)
-                // §22 fix: these previously were independently hardcoded (11.0 / 18.0), out of
-                // sync with the actual bundled data (verified via sqlite3 against coimbatore.mbtiles
-                // itself: real tile data only covers zoom 11-16). 18.0 let users pinch-zoom two
-                // levels past the last real tile -- a guaranteed blank map at that zoom, easily
-                // mistaken for the offline map "not working" at all. Single source of truth now.
-                minZoomLevel = OfflineMapManager.MIN_ZOOM.toDouble()
-                maxZoomLevel = OfflineMapManager.MAX_ZOOM.toDouble()
-                controller.setZoom(15.5)
+                mapView.apply {
+                    setMultiTouchControls(true)
+                    setUseDataConnection(false)
+                    minZoomLevel = OfflineMapManager.MIN_ZOOM.toDouble()
+                    maxZoomLevel = OfflineMapManager.MAX_ZOOM.toDouble()
+                    controller.setZoom(15.5)
 
-                val initialPoint = if (latitude > 1.0 && longitude > 1.0) {
+                    val initialPoint = if (latitude > 1.0 && longitude > 1.0) {
+                        GeoPoint(latitude, longitude)
+                    } else {
+                        OfflineMapManager.COIMBATORE_CENTER
+                    }
+                    controller.setCenter(initialPoint)
+
+                    try {
+                        val matcher = MapMatcher(context)
+                        val roads = matcher.getRoads()
+                        if (roads.isNotEmpty()) {
+                            val roadsOverlay = FolderOverlay()
+                            roadsOverlay.name = "coimbatore_vector_roads"
+                            for (road in roads) {
+                                val polyline = Polyline(this)
+                                polyline.outlinePaint.color = AndroidColor.argb(90, 59, 130, 246)
+                                polyline.outlinePaint.strokeWidth = 3f
+                                val pts = road.points.map { GeoPoint(it.lat, it.lon) }
+                                polyline.setPoints(pts)
+                                polyline.title = road.name
+                                roadsOverlay.add(polyline)
+                            }
+                            overlays.add(roadsOverlay)
+                        }
+                    } catch (e: Exception) {
+                        // Fallback to raster tiles only
+                    }
+
+                    val marker = Marker(this).apply {
+                        id = "vehicle_marker"
+                        position = initialPoint
+                        title = if (roadName.isNotBlank()) roadName else "Gudumap Position"
+                        snippet = "Lat: %.5f, Lon: %.5f".format(initialPoint.latitude, initialPoint.longitude)
+                        rotation = headingDeg
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                        val iconDrawable = ContextCompat.getDrawable(context, R.drawable.ic_navigation_arrow)
+                        if (iconDrawable != null) {
+                            icon = iconDrawable
+                        }
+                    }
+                    overlays.add(marker)
+
+                    invalidate()
+                }
+
+                osmMapRef = mapView
+                mapView
+            },
+            update = { map ->
+                map.setUseDataConnection(false)
+                val colorFilter = if (isDarkMode) {
+                    val matrix = floatArrayOf(
+                        -0.85f, 0f, 0f, 0f, 230f,
+                        0f, -0.85f, 0f, 0f, 230f,
+                        0f, 0f, -0.85f, 0f, 240f,
+                        0f, 0f, 0f, 1.0f, 0f
+                    )
+                    android.graphics.ColorMatrixColorFilter(matrix)
+                } else {
+                    null
+                }
+                map.overlayManager.tilesOverlay.setColorFilter(colorFilter)
+
+                val hasRealFix = latitude > 1.0 && longitude > 1.0
+                val currentPoint = if (hasRealFix) {
                     GeoPoint(latitude, longitude)
                 } else {
                     OfflineMapManager.COIMBATORE_CENTER
                 }
-                controller.setCenter(initialPoint)
 
-                // Optional: add real road vector overlays for visual clarity
-                try {
-                    val matcher = MapMatcher(context)
-                    val roads = matcher.getRoads()
-                    if (roads.isNotEmpty()) {
-                        val roadsOverlay = FolderOverlay()
-                        roadsOverlay.name = "coimbatore_vector_roads"
-                        for (road in roads) {
-                            val polyline = Polyline(this)
-                            polyline.outlinePaint.color = AndroidColor.argb(90, 59, 130, 246)
-                            polyline.outlinePaint.strokeWidth = 3f
-                            val pts = road.points.map { GeoPoint(it.lat, it.lon) }
-                            polyline.setPoints(pts)
-                            polyline.title = road.name
-                            roadsOverlay.add(polyline)
+                if (blackoutMode && !wasBlackout.value) {
+                    correctedTrail.clear()
+                    naiveTrail.clear()
+                }
+                wasBlackout.value = blackoutMode
+
+                if (blackoutMode) {
+                    correctedTrail.add(currentPoint)
+                    if (correctedTrail.size > MAX_TRAIL_POINTS) correctedTrail.removeAt(0)
+                }
+
+                if (blackoutMode) {
+                    val naivePoint = if (naiveLatitude > 1.0 && naiveLongitude > 1.0) {
+                        GeoPoint(naiveLatitude, naiveLongitude)
+                    } else {
+                        currentPoint
+                    }
+                    naiveTrail.add(naivePoint)
+                    if (naiveTrail.size > MAX_TRAIL_POINTS) naiveTrail.removeAt(0)
+                }
+
+                val existingMarker = map.overlays.filterIsInstance<Marker>().firstOrNull { it.id == "vehicle_marker" }
+                if (hasRealFix) {
+                    val marker = existingMarker
+                        ?: Marker(map).also {
+                            it.id = "vehicle_marker"
+                            it.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                            val iconDrawable = ContextCompat.getDrawable(map.context, R.drawable.ic_navigation_arrow)
+                            if (iconDrawable != null) {
+                                it.icon = iconDrawable
+                            }
+                            map.overlays.add(it)
                         }
-                        overlays.add(roadsOverlay)
-                    }
-                } catch (e: Exception) {
-                    // Fallback to raster tiles only
+
+                    marker.position = currentPoint
+                    marker.rotation = headingDeg
+                    marker.title = if (roadName.isNotBlank()) "📍 $roadName (Your Location)" else "📍 Your Location"
+                    marker.snippet = "Lat: %.5f, Lon: %.5f".format(currentPoint.latitude, currentPoint.longitude)
+                } else if (existingMarker != null) {
+                    map.overlays.remove(existingMarker)
                 }
 
-                // Vehicle Position Marker
-                val marker = Marker(this).apply {
-                    id = "vehicle_marker"
-                    position = initialPoint
-                    title = if (roadName.isNotBlank()) roadName else "Gudumap Position"
-                    snippet = "Lat: %.5f, Lon: %.5f".format(initialPoint.latitude, initialPoint.longitude)
-                    rotation = headingDeg
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    val iconDrawable = ContextCompat.getDrawable(context, R.drawable.ic_navigation_arrow)
-                    if (iconDrawable != null) {
-                        icon = iconDrawable
+                val correctedPolyline = map.overlays
+                    .filterIsInstance<Polyline>()
+                    .firstOrNull { it.id == "corrected_trail" }
+                    ?: Polyline(map).also {
+                        it.id = "corrected_trail"
+                        it.outlinePaint.color = AndroidColor.rgb(37, 99, 235)
+                        it.outlinePaint.strokeWidth = 7f
+                        map.overlays.add(0, it)
                     }
-                }
-                overlays.add(marker)
+                correctedPolyline.setPoints(if (blackoutMode) correctedTrail else emptyList())
 
-                invalidate()
-            }
-        },
-        update = { map ->
-            // Enforce offline mode on every recomposition
-            map.setUseDataConnection(false)
+                val naivePolyline = map.overlays
+                    .filterIsInstance<Polyline>()
+                    .firstOrNull { it.id == "naive_trail" }
+                    ?: Polyline(map).also {
+                        it.id = "naive_trail"
+                        it.outlinePaint.color = AndroidColor.argb(200, 220, 38, 38)
+                        it.outlinePaint.strokeWidth = 5f
+                        map.overlays.add(0, it)
+                    }
+                naivePolyline.setPoints(if (blackoutMode) naiveTrail else emptyList())
 
-            val hasRealFix = latitude > 1.0 && longitude > 1.0
-            val currentPoint = if (hasRealFix) {
-                GeoPoint(latitude, longitude)
-            } else {
-                // No real fix yet -- fall back to a generic map viewport only (Coimbatore is the
-                // only offline tileset bundled), never claim this as an actual measured position.
-                OfflineMapManager.COIMBATORE_CENTER
-            }
-
-            // A fresh blackout starting resets both trails, mirroring the engine
-            // resetting its own naive/corrected integrators at the same moment.
-            if (blackoutMode && !wasBlackout.value) {
-                correctedTrail.clear()
-                naiveTrail.clear()
-            }
-            wasBlackout.value = blackoutMode
-
-            // Corrected trail only accumulates during blackout (matches the naive trail's
-            // existing gating below) -- previously unconditional, so it drew and grew a
-            // thick blue polyline continuously even during normal GPS operation (found
-            // while investigating a map glitch report, PROJECT_STATUS.md §20).
-            if (blackoutMode) {
-                correctedTrail.add(currentPoint)
-                if (correctedTrail.size > MAX_TRAIL_POINTS) correctedTrail.removeAt(0)
-            }
-
-            if (blackoutMode) {
-                val naivePoint = if (naiveLatitude > 1.0 && naiveLongitude > 1.0) {
-                    GeoPoint(naiveLatitude, naiveLongitude)
+                val uncertaintyCircle = map.overlays
+                    .filterIsInstance<Polygon>()
+                    .firstOrNull { it.id == "uncertainty_circle" }
+                    ?: Polygon(map).also {
+                        it.id = "uncertainty_circle"
+                        it.fillPaint.color = AndroidColor.argb(40, 220, 38, 38)
+                        it.outlinePaint.color = AndroidColor.argb(120, 220, 38, 38)
+                        it.outlinePaint.strokeWidth = 2f
+                        map.overlays.add(0, it)
+                    }
+                if (blackoutMode && uncertaintyRadiusMeters > 0.5) {
+                    uncertaintyCircle.setPoints(Polygon.pointsAsCircle(currentPoint, uncertaintyRadiusMeters))
                 } else {
-                    currentPoint
+                    uncertaintyCircle.setPoints(emptyList())
                 }
-                naiveTrail.add(naivePoint)
-                if (naiveTrail.size > MAX_TRAIL_POINTS) naiveTrail.removeAt(0)
-            }
 
-            val existingMarker = map.overlays.filterIsInstance<Marker>().firstOrNull { it.id == "vehicle_marker" }
-            if (hasRealFix) {
-                val marker = existingMarker
-                    ?: Marker(map).also {
-                        it.id = "vehicle_marker"
-                        it.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                        val iconDrawable = ContextCompat.getDrawable(map.context, R.drawable.ic_navigation_arrow)
-                        if (iconDrawable != null) {
-                            it.icon = iconDrawable
-                        }
-                        map.overlays.add(it)
+                val pinpointRing = map.overlays
+                    .filterIsInstance<Polygon>()
+                    .firstOrNull { it.id == "pinpoint_ring" }
+                    ?: Polygon(map).also {
+                        it.id = "pinpoint_ring"
+                        it.fillPaint.color = AndroidColor.argb(35, 37, 99, 235)
+                        it.outlinePaint.color = AndroidColor.argb(160, 37, 99, 235)
+                        it.outlinePaint.strokeWidth = 3f
+                        map.overlays.add(0, it)
                     }
+                if (hasRealFix) {
+                    pinpointRing.setPoints(Polygon.pointsAsCircle(currentPoint, 8.0))
+                } else {
+                    pinpointRing.setPoints(emptyList())
+                }
 
-                marker.position = currentPoint
-                marker.rotation = headingDeg
-                marker.title = if (roadName.isNotBlank()) roadName else "Gudumap Position"
-                marker.snippet = "Lat: %.5f, Lon: %.5f".format(currentPoint.latitude, currentPoint.longitude)
-            } else if (existingMarker != null) {
-                // No real fix (yet, or anymore) -- don't show a marker that could be mistaken
-                // for an actual position (Fix 2, PROJECT_STATUS.md §11).
-                map.overlays.remove(existingMarker)
+                map.controller.setCenter(currentPoint)
+                map.invalidate()
             }
+        )
 
-            // Corrected (GRU+EKF+ZUPT) trail -- blue, only shown once a blackout has
-            // started, matching the naive trail's own gating immediately below (§20 fix).
-            val correctedPolyline = map.overlays
-                .filterIsInstance<Polyline>()
-                .firstOrNull { it.id == "corrected_trail" }
-                ?: Polyline(map).also {
-                    it.id = "corrected_trail"
-                    it.outlinePaint.color = AndroidColor.rgb(37, 99, 235)
-                    it.outlinePaint.strokeWidth = 7f
-                    map.overlays.add(0, it) // beneath the road overlay/marker
-                }
-            correctedPolyline.setPoints(if (blackoutMode) correctedTrail else emptyList())
+        // ========================================================
+        // FLOATING MAP OVERLAY CONTROLS (UX Upgrade)
+        // ========================================================
 
-            // Naive (uncorrected double-integration) trail -- red, only exists once a
-            // blackout has started, so the contrast only appears when it's meaningful.
-            val naivePolyline = map.overlays
-                .filterIsInstance<Polyline>()
-                .firstOrNull { it.id == "naive_trail" }
-                ?: Polyline(map).also {
-                    it.id = "naive_trail"
-                    it.outlinePaint.color = AndroidColor.argb(200, 220, 38, 38)
-                    it.outlinePaint.strokeWidth = 5f
-                    map.overlays.add(0, it)
-                }
-            naivePolyline.setPoints(if (blackoutMode) naiveTrail else emptyList())
-
-            // Growing EKF position-uncertainty circle around the current corrected
-            // position -- only meaningful (and only shown) during an active blackout.
-            val uncertaintyCircle = map.overlays
-                .filterIsInstance<Polygon>()
-                .firstOrNull { it.id == "uncertainty_circle" }
-                ?: Polygon(map).also {
-                    it.id = "uncertainty_circle"
-                    it.fillPaint.color = AndroidColor.argb(40, 220, 38, 38)
-                    it.outlinePaint.color = AndroidColor.argb(120, 220, 38, 38)
-                    it.outlinePaint.strokeWidth = 2f
-                    map.overlays.add(0, it)
-                }
-            if (blackoutMode && uncertaintyRadiusMeters > 0.5) {
-                uncertaintyCircle.setPoints(Polygon.pointsAsCircle(currentPoint, uncertaintyRadiusMeters))
-            } else {
-                uncertaintyCircle.setPoints(emptyList())
+        // Top-Left: Offline Map Status Badge
+        Surface(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = if (isExpanded) 62.dp else 12.dp, top = 12.dp),
+            shape = RoundedCornerShape(20.dp),
+            color = Color(0xEE0F172A),
+            shadowElevation = 4.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .background(Color(0xFF10B981), CircleShape)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "COIMBATORE OFFLINE",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White,
+                    letterSpacing = 0.5.sp
+                )
             }
-
-            // Instant recenter, not an animated pan -- animateTo() was restarting a smooth-pan
-            // animation on every ~80ms tick (never letting the previous one finish), a likely
-            // contributor to visible camera jitter (§20 fix).
-            map.controller.setCenter(currentPoint)
-            map.invalidate()
         }
-    )
+
+        // Top-Right: Heading Compass Pill
+        Surface(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(12.dp),
+            shape = RoundedCornerShape(20.dp),
+            color = Color(0xEE0F172A),
+            shadowElevation = 4.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "🧭 ${headingDeg.toInt()}°",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF60A5FA)
+                )
+            }
+        }
+
+        // Bottom-Left: My Location Floating Action Pill
+        Surface(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(12.dp)
+                .clickable {
+                    val currentPoint = if (latitude > 1.0 && longitude > 1.0) {
+                        GeoPoint(latitude, longitude)
+                    } else {
+                        OfflineMapManager.COIMBATORE_CENTER
+                    }
+                    osmMapRef?.controller?.setZoom(16.0)
+                    osmMapRef?.controller?.setCenter(currentPoint)
+                    val marker = osmMapRef?.overlays?.filterIsInstance<Marker>()?.firstOrNull { it.id == "vehicle_marker" }
+                    marker?.showInfoWindow()
+                    osmMapRef?.invalidate()
+                },
+            shape = RoundedCornerShape(20.dp),
+            color = Color(0xFF2563EB),
+            shadowElevation = 4.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "📍 MY LOCATION",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White,
+                    letterSpacing = 0.5.sp
+                )
+            }
+        }
+
+        // Bottom-Right: Zoom, Recenter & Enlarge Controls
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Enlarge / Fullscreen Map Button
+            if (onToggleExpand != null) {
+                Surface(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clickable { onToggleExpand() },
+                    shape = CircleShape,
+                    color = Color(0xFF0F172A),
+                    shadowElevation = 4.dp
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(if (isExpanded) "↙" else "⛶", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            // Recenter Button
+            Surface(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clickable {
+                        val currentPoint = if (latitude > 1.0 && longitude > 1.0) {
+                            GeoPoint(latitude, longitude)
+                        } else {
+                            OfflineMapManager.COIMBATORE_CENTER
+                        }
+                        osmMapRef?.controller?.setCenter(currentPoint)
+                        osmMapRef?.invalidate()
+                    },
+                shape = CircleShape,
+                color = Color.White,
+                shadowElevation = 4.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text("🎯", fontSize = 16.sp)
+                }
+            }
+
+            // Zoom In Button
+            Surface(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clickable {
+                        osmMapRef?.controller?.zoomIn()
+                    },
+                shape = CircleShape,
+                color = Color.White,
+                shadowElevation = 4.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                }
+            }
+
+            // Zoom Out Button
+            Surface(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clickable {
+                        osmMapRef?.controller?.zoomOut()
+                    },
+                shape = CircleShape,
+                color = Color.White,
+                shadowElevation = 4.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text("-", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                }
+            }
+        }
+    }
 }

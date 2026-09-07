@@ -224,6 +224,19 @@ class SensorManager(
         rotationVectorAccuracy = AndroidSensorManager.SENSOR_STATUS_UNRELIABLE
     }
 
+    /**
+     * Unregisters all sensor listeners at once (merged back from teammate's branch,
+     * PROJECT_STATUS.md §26) -- for background/lifecycle pause. Not yet called anywhere on
+     * this branch; NavigationEngine.pause()/resume() (teammate's feature) would call this, but
+     * that file is a separate, not-yet-applied merge decision.
+     */
+    fun stopAll() {
+        stopAccelerometer()
+        stopGyroscope()
+        stopMagnetometer()
+        stopRotationVector()
+    }
+
     // =========================================================
     // SENSOR EVENT LISTENER
     // =========================================================

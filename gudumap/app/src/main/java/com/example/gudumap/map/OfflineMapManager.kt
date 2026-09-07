@@ -106,9 +106,33 @@ class OfflineMapManager(private val context: Context) {
                 return
             }
 
-            // Copy from asset if target doesn't exist or size is 0
-            if (assetPath != null && (!targetFile.exists() || targetFile.length() == 0L)) {
-                Log.i(TAG, "First installation: Copying offline Coimbatore map from $assetPath to ${targetFile.absolutePath}...")
+            // §26: re-copy if the bundled asset's size differs from what's already sitting in
+            // internal storage, not just when the target is missing/empty. Merged back from
+            // teammate's branch -- without this, a future APK update that ships a
+            // corrected/updated coimbatore.mbtiles would silently keep using whatever was
+            // copied on first install forever (internal storage is never touched again once a
+            // non-empty file exists there). Only matters for a future map-data update; has no
+            // effect on a fresh install, where targetFile doesn't exist yet either way.
+            val assetSize = if (assetPath != null) {
+                try {
+                    context.assets.openFd(assetPath).length
+                } catch (e: Exception) {
+                    try {
+                        context.assets.open(assetPath).use { it.available().toLong() }
+                    } catch (e2: Exception) {
+                        0L
+                    }
+                }
+            } else 0L
+
+            val shouldCopy = assetPath != null && (
+                !targetFile.exists() ||
+                targetFile.length() == 0L ||
+                (assetSize > 0L && targetFile.length() != assetSize)
+            )
+
+            if (shouldCopy && assetPath != null) {
+                Log.i(TAG, "Copying offline Coimbatore map package from $assetPath to ${targetFile.absolutePath} (asset size: ${assetSize} B)...")
                 context.assets.open(assetPath).use { input ->
                     FileOutputStream(targetFile).use { output ->
                         input.copyTo(output)

@@ -89,6 +89,21 @@ class NavigationViewModel(
         navigationEngine.retryLocationUpdatesIfNeeded()
     }
 
+    /**
+     * Pauses/resumes sensors and location updates for app-lifecycle background safety (merged
+     * back from teammate's branch, PROJECT_STATUS.md §27) -- held back in an earlier session
+     * since NavigationEngine.pause()/resume() didn't exist yet; unblocked now that they do. Not
+     * yet wired to any Activity/Compose lifecycle observer on this branch -- call sites are a
+     * separate step, not part of this merge.
+     */
+    fun pauseNavigation() {
+        navigationEngine.pause()
+    }
+
+    fun resumeNavigation() {
+        navigationEngine.resume()
+    }
+
     override fun onCleared() {
         super.onCleared()
         navigationEngine.stop()

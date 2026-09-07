@@ -2,6 +2,10 @@ package com.example.gudumap.navigation
 
 import android.content.Context
 import android.location.Location
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.util.Log
 import com.example.gudumap.map.MapMatcher
 import com.example.gudumap.map.OfflineMapManager
@@ -31,6 +35,7 @@ import kotlin.math.max
  * 5. Multi-signal Zero-Velocity Updates (ZUPT) and Non-Holonomic Constraints (NHC)
  * 6. Offline Coimbatore Map Matching & Offline Map Manager
  * 7. GNSS Blackout & Recovery Modes
+ * 8. Automatic Internet-Loss-Triggered Blackout & Lifecycle Pause/Resume
  */
 class NavigationEngine(
     private val context: Context,
@@ -54,6 +59,16 @@ class NavigationEngine(
     private var gnssNavMode = "GNSS_AVAILABLE"
     private var blackoutActive = false
     private var latestRawGnssLocation: Location? = null
+
+    // Automatic internet-loss-triggered blackout (merged back from teammate's branch,
+    // PROJECT_STATUS.md §27). isInternetAvailable seeds from OfflineMapManager.isOnline() (the
+    // stricter, NET_CAPABILITY_VALIDATED-checking version -- PROJECT_STATUS.md §26 Q1), and the
+    // NetworkCallback's own request below also requires NET_CAPABILITY_VALIDATED, so this
+    // feature stays consistent with that decision end to end, not just at startup.
+    private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+    private var isInternetAvailable = true
+    private var autoTriggeredByNetworkLoss = false
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     // Blackout tracking fields
     private var blackoutStartTimeMs = 0L
@@ -91,7 +106,17 @@ class NavigationEngine(
     fun start() {
         Log.i(TAG, "Starting Gudumap Navigation Engine...")
         deadReckoningEngine.initializeAssets(context)
+        startSensors()
+        startLocationListening()
+        registerNetworkCallback()
+    }
 
+    /**
+     * Registers all four motion sensors. Extracted from [start] (merged back from teammate's
+     * branch, PROJECT_STATUS.md §27) so [resume] can re-register them after [pause] stopped
+     * them, without duplicating this wiring.
+     */
+    private fun startSensors() {
         // 1. Rotation Vector
         sensorManager.startRotationVector { data ->
             sensorFusionManager.updateRotationVector(data.rotationMatrix, data.timestampNs)
@@ -124,9 +149,97 @@ class NavigationEngine(
         sensorManager.startMagnetometer { data ->
             sensorFusionManager.updateMagnetometer(data.x, data.y, data.z, data.timestampNs)
         }
+    }
 
-        // 5. GNSS Location
-        startLocationListening()
+    /**
+     * Stops all sensors and location updates (merged back from teammate's branch,
+     * PROJECT_STATUS.md §27) -- call when the app backgrounds, so it isn't running a full
+     * sensor+location pipeline indefinitely while nobody is looking at it. Does not touch
+     * [networkCallback] -- connectivity monitoring for the auto-blackout feature keeps running
+     * regardless of pause state, since losing internet is meaningful whether or not the UI is
+     * currently visible.
+     */
+    fun pause() {
+        Log.i(TAG, "Pausing Gudumap Navigation Engine (unregistering sensors & location listener for background safety)")
+        sensorManager.stopAll()
+        locationManager.stopLocationUpdates()
+    }
+
+    /**
+     * Re-registers sensors and location updates after [pause] (PROJECT_STATUS.md §27). Reuses
+     * [retryLocationUpdatesIfNeeded] rather than calling [startLocationListening] directly, so
+     * this stays safe even if permission was revoked while backgrounded.
+     */
+    fun resume() {
+        Log.i(TAG, "Resuming Gudumap Navigation Engine (re-registering sensors)")
+        startSensors()
+        retryLocationUpdatesIfNeeded()
+    }
+
+    /**
+     * Automatic internet-loss-triggered blackout (merged back from teammate's branch,
+     * PROJECT_STATUS.md §27). Until now the ONLY way to enter blackout/dead-reckoning mode was
+     * the manual on-screen button; this watches Android's own connectivity state and enters
+     * blackout automatically the moment real internet is genuinely lost (as long as a real GPS
+     * fix already exists to anchor from -- never falls back to any default position, same
+     * guarantee [setBlackoutMode] already enforces for the manual path).
+     *
+     * The network request requires NET_CAPABILITY_VALIDATED, not just NET_CAPABILITY_INTERNET
+     * -- matching the stricter isOnline() decision (PROJECT_STATUS.md §26 Q1). Without this, a
+     * captive-portal Wi-Fi (common at demo/conference venues) that LOOKS connected but isn't
+     * would fire onAvailable() and could suppress this exact safety feature at the worst
+     * possible moment, or end an auto-triggered blackout while genuine internet still isn't
+     * actually working.
+     *
+     * autoTriggeredByNetworkLoss distinguishes an auto-triggered blackout from a manually
+     * started one: only a blackout THIS callback started gets automatically ended when internet
+     * returns. A blackout a person started deliberately via the button is left alone even if
+     * internet happens to come back mid-blackout -- ending it wasn't an automatic decision to
+     * make on the user's behalf.
+     */
+    private fun registerNetworkCallback() {
+        isInternetAvailable = offlineMapManager.isOnline()
+        try {
+            val request = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                .build()
+
+            networkCallback = object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    Log.i(TAG, "Network Callback: Internet is ONLINE")
+                    isInternetAvailable = true
+                    if (autoTriggeredByNetworkLoss && blackoutActive) {
+                        autoTriggeredByNetworkLoss = false
+                        setBlackoutMode(false, isAutomatic = true)
+                    }
+                    emitThrottledState(force = true)
+                }
+
+                override fun onLost(network: Network) {
+                    Log.i(TAG, "Network Callback: Internet is OFFLINE -- auto-activating AI location prediction")
+                    isInternetAvailable = false
+                    if (!blackoutActive && latestRawGnssLocation != null) {
+                        autoTriggeredByNetworkLoss = true
+                        setBlackoutMode(true, isAutomatic = true)
+                    }
+                    emitThrottledState(force = true)
+                }
+
+                override fun onUnavailable() {
+                    Log.i(TAG, "Network Callback: Internet is UNAVAILABLE")
+                    isInternetAvailable = false
+                    if (!blackoutActive && latestRawGnssLocation != null) {
+                        autoTriggeredByNetworkLoss = true
+                        setBlackoutMode(true, isAutomatic = true)
+                    }
+                    emitThrottledState(force = true)
+                }
+            }
+            connectivityManager?.registerNetworkCallback(request, networkCallback!!)
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not register network callback: ${e.message}")
+        }
     }
 
     /**
@@ -255,9 +368,23 @@ class NavigationEngine(
 
     /**
      * Explicit API to set GNSS blackout state.
+     *
+     * @param isAutomatic true only when this call originates from [registerNetworkCallback]'s
+     * own handlers (PROJECT_STATUS.md §27/§28) -- every other caller (the manual UI button via
+     * [NavigationViewModel], [toggleBlackout]) uses the default `false`. A manual call resets
+     * [autoTriggeredByNetworkLoss] to false, so that flag can never outlive the specific
+     * auto-triggered blackout session it was set for. Without this, a manually-ended-then-
+     * manually-restarted blackout (both while still offline) would inherit a stale `true` from
+     * an earlier, unrelated auto-triggered cycle and get incorrectly auto-ended the next time
+     * internet returns (§27's disclosed edge case, closed here). Automatic calls skip this
+     * reset -- they manage the flag themselves, immediately before/after calling this function.
      */
-    fun setBlackoutMode(enabled: Boolean) {
+    fun setBlackoutMode(enabled: Boolean, isAutomatic: Boolean = false) {
         if (enabled == blackoutActive) return
+
+        if (!isAutomatic) {
+            autoTriggeredByNetworkLoss = false
+        }
 
         if (enabled) {
             // Refuse to enter blackout without ever having had a real GPS fix (Fix 2,
@@ -488,8 +615,8 @@ class NavigationEngine(
             val currentError = _state.value.positionErrorMeters
 
             Log.i("GUDUMAP_BLACKOUT", String.format(Locale.US,
-                "DR_UPDATE: t=%d lat=%.6f lon=%.6f speed=%.2f distance=%.2f motionState=%s mlGate=%s",
-                now, currentLat, currentLon, currentSpeedKmh, drDist, motionStateStr, drState.latestGateAction
+                "DR_UPDATE: t=%d lat=%.6f lon=%.6f speed=%.2f distance=%.2f motionState=%s mlGate=%s motionMode=%s",
+                now, currentLat, currentLon, currentSpeedKmh, drDist, motionStateStr, drState.latestGateAction, drState.motionMode
             ))
 
             BlackoutMetrics(
@@ -547,12 +674,18 @@ class NavigationEngine(
                 naiveLongitude = drState.naiveLongitude,
                 uncertaintyRadiusMeters = drState.uncertaintyRadiusMeters,
                 headingConfidence = headingConfidenceStr,
+                motionMode = drState.motionMode,
+                isInternetAvailable = isInternetAvailable,
                 timestampNs = System.nanoTime()
             )
         }
     }
 
     fun stop() {
+        networkCallback?.let {
+            try { connectivityManager?.unregisterNetworkCallback(it) } catch (_: Exception) {}
+        }
+        networkCallback = null
         sensorManager.stopAccelerometer()
         sensorManager.stopGyroscope()
         sensorManager.stopMagnetometer()

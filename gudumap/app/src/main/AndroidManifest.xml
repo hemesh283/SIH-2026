@@ -3,6 +3,7 @@
 
     <!-- Internet access for OpenStreetMap -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!-- Phone location -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

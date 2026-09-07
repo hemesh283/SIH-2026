@@ -29,7 +29,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,11 +57,9 @@ import com.example.gudumap.viewmodel.NavigationViewModel
 import java.util.Locale
 
 /**
- * Plain-language confidence tier derived from the EKF's numeric uncertainty radius.
- *
- * These thresholds (<5m High, 5-15m Medium, >15m Low) are a first-pass judgment call for
- * demo/UI purposes only -- they have NOT been validated against real measured accuracy data.
- * See docs/PROJECT_STATUS.md for the session that introduced them.
+ * Plain-language confidence tier derived from the EKF's numeric uncertainty radius (§19/§23).
+ * Thresholds are a first-pass judgment call for demo/UI purposes only -- not validated against
+ * real measured accuracy data.
  */
 private fun confidenceLevel(radiusMeters: Double): String = when {
     radiusMeters < 5.0 -> "High"
@@ -70,10 +67,19 @@ private fun confidenceLevel(radiusMeters: Double): String = when {
     else -> "Low"
 }
 
+// Solid-fill colors, not a light tint behind same-hue text (§23: a tint background + full-
+// saturation text of the same color measured only ~2.8-4.0:1 contrast, failing WCAG AA 4.5:1).
+// These are used as solid chip fills with white text, verified >=4.8:1 at any size.
 private fun confidenceColor(level: String): Color = when (level) {
-    "High" -> Color(0xFF16A34A)
-    "Medium" -> Color(0xFFD97706)
+    "High" -> Color(0xFF047857)
+    "Medium" -> Color(0xFFB45309)
     else -> Color(0xFFDC2626)
+}
+
+private fun confidenceCaption(level: String): String = when (level) {
+    "High" -> "Position is well-established"
+    "Medium" -> "Position may drift slightly"
+    else -> "Recalculating -- treat position as approximate"
 }
 
 @Composable
@@ -97,24 +103,29 @@ fun NavigationScreen(
     ) { granted ->
         permissionGranted = granted
         if (granted) {
-            // Fix (PROJECT_STATUS.md §13/14): previously this only updated the local UI flag
-            // above -- location updates were never actually (re-)registered after a late grant.
             navViewModel.retryLocationUpdatesIfNeeded()
         }
     }
 
-    // Also catch permission granted via system Settings while backgrounded (e.g. a judge saying
-    // "wait, grant it again" mid-demo) -- re-check on every resume, not just the in-app dialog.
+    // Pause/resume sensors+location on app background/foreground (§27), and re-check permission
+    // on resume in case it was granted via system Settings while backgrounded.
     val lifecycleOwner = LocalLifecycleOwner.current
     val latestViewModel by rememberUpdatedState(navViewModel)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                permissionGranted = ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-                latestViewModel.retryLocationUpdatesIfNeeded()
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    latestViewModel.resumeNavigation()
+                    permissionGranted = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                    latestViewModel.retryLocationUpdatesIfNeeded()
+                }
+                Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_STOP -> {
+                    latestViewModel.pauseNavigation()
+                }
+                else -> {}
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -123,8 +134,33 @@ fun NavigationScreen(
         }
     }
 
+    var isMapExpanded by remember { mutableStateOf(false) }
     var blackoutControlStage by remember { mutableStateOf(0) } // 0: GNSS AVAILABLE, 1: START GNSS BLACKOUT
     var showTechnicalDetails by remember { mutableStateOf(false) }
+
+    if (isMapExpanded) {
+        // Full-screen map -- MapView's own floating "shrink" button (isExpanded=true shows "↙")
+        // is what collapses this back; no other chrome needed here (§29's MapView.kt is
+        // otherwise unmodified, invoked with the exact same params as the non-expanded case).
+        Box(modifier = Modifier.fillMaxSize()) {
+            MapView(
+                latitude = navState.latitude,
+                longitude = navState.longitude,
+                headingDeg = navState.headingDeg,
+                mapStatus = navState.mapStatus,
+                offlineMapStatus = navState.offlineMapStatus,
+                roadName = navState.currentRoadName,
+                blackoutMode = navState.blackoutMode,
+                naiveLatitude = navState.naiveLatitude,
+                naiveLongitude = navState.naiveLongitude,
+                uncertaintyRadiusMeters = navState.uncertaintyRadiusMeters,
+                isExpanded = true,
+                onToggleExpand = { isMapExpanded = false },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        return
+    }
 
     Column(
         modifier = Modifier
@@ -135,34 +171,8 @@ fun NavigationScreen(
     ) {
 
         // ========================================================
-        // HEADER
+        // 1. STATUS BANNER -- plain language, calm color per state
         // ========================================================
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = "GUDUMAP",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFF1E293B)
-                )
-                Text(
-                    text = "Intelligent Dead Reckoning Navigation",
-                    fontSize = 13.sp,
-                    color = Color(0xFF64748B)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        // ========================================================
-        // PRIMARY VIEW -- shown to everyone, no technical jargon
-        // ========================================================
-
         StatusBanner(
             blackoutMode = navState.blackoutMode,
             gnssNavigationMode = navState.gnssNavigationMode
@@ -170,16 +180,17 @@ fun NavigationScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // MAP -- the visual centerpiece of the primary view. Unchanged MapView.kt: the
-        // position marker and the confidence-radius circle it already draws during blackout
-        // are exactly what make this the centerpiece, no changes needed there.
+        // ========================================================
+        // 2. MAP -- MapView.kt itself untouched (§29); same params as the
+        // expanded branch above, isExpanded=false here.
+        // ========================================================
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             shape = RoundedCornerShape(14.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
-            Column(modifier = Modifier.padding(10.dp)) {
+            Column(modifier = Modifier.padding(6.dp)) {
                 MapView(
                     latitude = navState.latitude,
                     longitude = navState.longitude,
@@ -190,21 +201,41 @@ fun NavigationScreen(
                     blackoutMode = navState.blackoutMode,
                     naiveLatitude = navState.naiveLatitude,
                     naiveLongitude = navState.naiveLongitude,
-                    uncertaintyRadiusMeters = navState.uncertaintyRadiusMeters
+                    uncertaintyRadiusMeters = navState.uncertaintyRadiusMeters,
+                    isExpanded = false,
+                    onToggleExpand = { isMapExpanded = true }
                 )
             }
         }
 
+        // ========================================================
+        // 3. POSITION CONFIDENCE -- only meaningful once blackout has
+        // introduced real drift uncertainty (matches when the numeric
+        // Confidence Radius figure in the technical details is meaningful).
+        // ========================================================
         if (navState.blackoutMode) {
             Spacer(modifier = Modifier.height(12.dp))
             PlainConfidenceCard(uncertaintyRadiusMeters = navState.uncertaintyRadiusMeters)
         }
 
+        // ========================================================
+        // 4. MOTION MODE BADGE -- NEW. Has never been visible in any prior
+        // UI version; directly surfaces the pedestrian-safety fallback
+        // (§24/§25). Only meaningful once a classification has actually
+        // been made (decided once at blackout entry) -- outside blackout
+        // motionMode just sits at its neutral "VEHICLE_MODE" default, so
+        // showing it then would be misleading, not informative.
+        // ========================================================
+        if (navState.blackoutMode) {
+            Spacer(modifier = Modifier.height(10.dp))
+            MotionModeBadge(motionMode = navState.motionMode)
+        }
+
         Spacer(modifier = Modifier.height(12.dp))
 
-        // GNSS Blackout trigger -- a control, not a status readout, so it stays visible in
-        // both the primary and technical-detail views (unchanged logic from before the
-        // two-tier redesign, only its position in the layout moved).
+        // ========================================================
+        // 5. GNSS BLACKOUT TOGGLE -- primary action, stays prominent.
+        // ========================================================
         BlackoutControlButton(
             navState = navState,
             blackoutControlStage = blackoutControlStage,
@@ -221,6 +252,9 @@ fun NavigationScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
+        // ========================================================
+        // 6. TECHNICAL DETAILS -- collapsed by default.
+        // ========================================================
         OutlinedButton(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
@@ -232,10 +266,6 @@ fun NavigationScreen(
             )
         }
 
-        // ========================================================
-        // TECHNICAL DETAIL VIEW -- collapsed by default, everything that was
-        // already here stays here, unchanged, just moved behind the toggle.
-        // ========================================================
         AnimatedVisibility(
             visible = showTechnicalDetails,
             enter = expandVertically() + fadeIn(),
@@ -244,166 +274,64 @@ fun NavigationScreen(
             Column {
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // GNSS RECOVERY BANNER (PART 10 & 14)
-                if (navState.gnssRecovered) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFECFDF5)),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "GNSS RECOVERED",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp,
-                                    color = Color(0xFF047857)
-                                )
-                                Text(
-                                    text = String.format(Locale.US, "Duration: %.1f s", navState.blackoutMetrics.blackoutDurationSeconds),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF065F46)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = String.format(Locale.US, "DR: %.1f m", navState.blackoutMetrics.drDistance),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF065F46)
-                                )
-                                Text(
-                                    text = String.format(Locale.US, "GNSS Ref: %.1f m", navState.blackoutMetrics.gnssReferenceDistance),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF065F46)
-                                )
-                                Text(
-                                    text = String.format(Locale.US, "Error: %.2f m", navState.recoveryDriftMeters),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF065F46)
-                                )
-                                Text(
-                                    text = String.format(Locale.US, "Drift: %.1f %%", navState.recoveryErrorPercent),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF065F46)
-                                )
-                            }
+                // DR Distance / Max Error / ML Latency / Confidence Radius / Heading Conf.
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(14.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "BLACKOUT METRICS",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF475569),
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            MetricTile(
+                                title = "DR Distance",
+                                value = String.format(Locale.US, "%.1f m", navState.blackoutMetrics.drDistance),
+                                modifier = Modifier.weight(1f)
+                            )
+                            MetricTile(
+                                title = "Max Error",
+                                value = String.format(Locale.US, "%.1f m", navState.blackoutMetrics.maximumPositionErrorMeters),
+                                modifier = Modifier.weight(1f)
+                            )
+                            MetricTile(
+                                title = "ML Latency",
+                                value = "${navState.mlInferenceLatencyMs} ms",
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            MetricTile(
+                                title = "Confidence Radius",
+                                value = String.format(Locale.US, "±%.1f m", navState.uncertaintyRadiusMeters),
+                                modifier = Modifier.weight(1f)
+                            )
+                            HeadingConfidenceTile(
+                                confidence = navState.headingConfidence,
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
-                // BLACKOUT STATUS CARD (PART 6)
-                if (navState.blackoutMode) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFEF2F2)),
-                        shape = RoundedCornerShape(14.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "GNSS BLACKOUT",
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color(0xFFDC2626)
-                                )
-                                val durSec = navState.blackoutDurationSeconds.toInt()
-                                val mm = durSec / 60
-                                val ss = durSec % 60
-                                Text(
-                                    text = String.format(Locale.US, "Duration: %02d:%02d", mm, ss),
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF991B1B)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                MetricTile(
-                                    title = "DR Distance",
-                                    value = String.format(Locale.US, "%.1f m", navState.blackoutMetrics.drDistance),
-                                    modifier = Modifier.weight(1f)
-                                )
-                                MetricTile(
-                                    title = "Max Error",
-                                    value = String.format(Locale.US, "%.1f m", navState.blackoutMetrics.maximumPositionErrorMeters),
-                                    modifier = Modifier.weight(1f)
-                                )
-                                MetricTile(
-                                    title = "ML Latency",
-                                    value = "${navState.mlInferenceLatencyMs} ms",
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                MetricTile(
-                                    title = "Confidence Radius",
-                                    value = String.format(Locale.US, "±%.1f m", navState.uncertaintyRadiusMeters),
-                                    modifier = Modifier.weight(1f)
-                                )
-                                HeadingConfidenceTile(
-                                    confidence = navState.headingConfidence,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            if (navState.gnssGroundTruthLat != null && navState.gnssGroundTruthLon != null) {
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(Color(0xFFFEE2E2), shape = RoundedCornerShape(8.dp))
-                                        .padding(10.dp)
-                                ) {
-                                    Column {
-                                        Text(
-                                            text = "GNSS Ground Truth (Evaluation only - NOT used for navigation)",
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color(0xFFB91C1C)
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = String.format(Locale.US, "Lat: %.6f, Lon: %.6f", navState.gnssGroundTruthLat, navState.gnssGroundTruthLon),
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = Color(0xFF7F1D1D)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // NAVIGATION STATUS (PART 3 & PART 5) -- status list only, the control
-                // button that used to live at the bottom of this card now lives in the
-                // always-visible primary view (BlackoutControlButton above).
+                // Full Navigation Status list, including Internet -- real backend state
+                // since §26/§27's isInternetAvailable merge.
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -415,7 +343,7 @@ fun NavigationScreen(
                             text = "NAVIGATION STATUS",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF64748B),
+                            color = Color(0xFF475569),
                             letterSpacing = 1.sp
                         )
                         Spacer(modifier = Modifier.height(10.dp))
@@ -426,16 +354,17 @@ fun NavigationScreen(
                             else -> navState.gnssStatus
                         }
                         val navDisplay = if (navState.blackoutMode) "DR" else "GNSS"
+                        val gateDisplay = "${navState.latestGateAction} (A:${navState.acceptedCount} C:${navState.clampedCount} R:${navState.rejectedCount})"
 
                         StatusRow(label = "GNSS", value = gnssDisplay, isGood = gnssDisplay == "AVAILABLE")
                         StatusRow(label = "Navigation", value = navDisplay, isGood = navDisplay == "GNSS")
                         StatusRow(label = "Motion", value = navState.motionState, isGood = true)
-                        val gateDisplay = "${navState.latestGateAction} (A:${navState.acceptedCount} C:${navState.clampedCount} R:${navState.rejectedCount})"
                         StatusRow(label = "ML Gate", value = gateDisplay, isGood = navState.latestGateAction == "ACCEPTED")
                         StatusRow(label = "ML", value = navState.mlStatus, isGood = navState.mlStatus == "ACTIVE")
                         StatusRow(label = "EKF", value = navState.ekfStatus, isGood = navState.ekfStatus == "ACTIVE")
                         StatusRow(label = "MAP", value = navState.mapStatus, isGood = true)
                         StatusRow(label = "OFFLINE MAP", value = navState.offlineMapStatus, isGood = navState.offlineMapStatus == "AVAILABLE")
+                        StatusRow(label = "Internet", value = if (navState.isInternetAvailable) "AVAILABLE" else "UNAVAILABLE", isGood = navState.isInternetAvailable)
 
                         if (navState.currentRoadName.isNotBlank()) {
                             Spacer(modifier = Modifier.height(6.dp))
@@ -451,7 +380,7 @@ fun NavigationScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // POSITION (PART 3)
+                // Position
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -463,7 +392,7 @@ fun NavigationScreen(
                             text = "POSITION",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF64748B),
+                            color = Color(0xFF475569),
                             letterSpacing = 1.sp
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -495,7 +424,7 @@ fun NavigationScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // NAVIGATION METRICS (PART 3)
+                // Navigation Metrics
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -507,7 +436,7 @@ fun NavigationScreen(
                             text = "NAVIGATION METRICS",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF64748B),
+                            color = Color(0xFF475569),
                             letterSpacing = 1.sp
                         )
                         Spacer(modifier = Modifier.height(10.dp))
@@ -560,7 +489,7 @@ fun NavigationScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // SENSOR STATUS (PART 3)
+                // Sensor Status
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -572,7 +501,7 @@ fun NavigationScreen(
                             text = "SENSOR STATUS",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF64748B),
+                            color = Color(0xFF475569),
                             letterSpacing = 1.sp
                         )
                         Spacer(modifier = Modifier.height(10.dp))
@@ -585,8 +514,8 @@ fun NavigationScreen(
             }
         }
 
-        // Location permission request -- a control, not a status readout, so (like the
-        // blackout button) it stays visible regardless of the technical-details toggle.
+        // Location permission request -- a control, not a status readout, so it stays
+        // visible regardless of the technical-details toggle.
         if (!permissionGranted) {
             Spacer(modifier = Modifier.height(14.dp))
             Button(
@@ -606,16 +535,18 @@ fun NavigationScreen(
 }
 
 /**
- * Primary-view status banner in plain language -- no "GNSS", "blackout", or other jargon.
- * The technical term (GNSS BLACKOUT / GNSS_RECOVERY) remains available in the detail view's
- * existing NAVIGATION STATUS card, unchanged.
+ * Plain-language status banner (§30 redesign). Three real states, three calm colors -- normal
+ * blackout/dead-reckoning operation is the system doing its job, not an error, so it does NOT
+ * get alarming red (a prior design flaw); strong red is reserved for a genuine problem state,
+ * of which none currently exists as a distinct boolean in NavigationState, so all three states
+ * here use calm, non-alarming colors.
  */
 @Composable
 private fun StatusBanner(blackoutMode: Boolean, gnssNavigationMode: String, modifier: Modifier = Modifier) {
     val (bgColor, textColor, message) = when {
-        blackoutMode -> Triple(Color(0xFFFEF2F2), Color(0xFFDC2626), "Navigating without GPS")
-        gnssNavigationMode == "GNSS_RECOVERY" -> Triple(Color(0xFFFFFBEB), Color(0xFFD97706), "Reconnecting to GPS…")
-        else -> Triple(Color(0xFFF0FDF4), Color(0xFF16A34A), "Navigating with GPS")
+        blackoutMode -> Triple(Color(0xFFEFF6FF), Color(0xFF1D4ED8), "Navigating without GPS")
+        gnssNavigationMode == "GNSS_RECOVERY" -> Triple(Color(0xFFFFFBEB), Color(0xFFD97706), "Reconnecting…")
+        else -> Triple(Color(0xFFF0FDF4), Color(0xFF16A34A), "Live Tracking")
     }
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -640,9 +571,8 @@ private fun StatusBanner(blackoutMode: Boolean, gnssNavigationMode: String, modi
 }
 
 /**
- * Plain-language confidence tier, shown only during blackout (mirrors when the numeric
- * Confidence Radius tile in the technical detail view is meaningful). Thresholds are a
- * first-pass judgment call -- see confidenceLevel() above.
+ * Plain-language confidence tier, shown only during blackout. Solid indicator + one-line
+ * caption (§23 redesign) rather than a low-contrast tinted pill.
  */
 @Composable
 private fun PlainConfidenceCard(uncertaintyRadiusMeters: Double, modifier: Modifier = Modifier) {
@@ -650,7 +580,7 @@ private fun PlainConfidenceCard(uncertaintyRadiusMeters: Double, modifier: Modif
     val color = confidenceColor(level)
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.06f)),
         shape = RoundedCornerShape(14.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -658,25 +588,38 @@ private fun PlainConfidenceCard(uncertaintyRadiusMeters: Double, modifier: Modif
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 14.dp, horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Position confidence",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF475569)
-            )
             Box(
                 modifier = Modifier
-                    .background(color.copy(alpha = 0.12f), shape = RoundedCornerShape(8.dp))
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .size(10.dp)
+                    .background(color, shape = CircleShape)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Position confidence",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF475569)
+                )
+                Text(
+                    text = confidenceCaption(level),
+                    fontSize = 12.sp,
+                    color = Color(0xFF64748B)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Box(
+                modifier = Modifier
+                    .background(color, shape = RoundedCornerShape(8.dp))
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
             ) {
                 Text(
                     text = level,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = color
+                    color = Color.White
                 )
             }
         }
@@ -684,9 +627,46 @@ private fun PlainConfidenceCard(uncertaintyRadiusMeters: Double, modifier: Modif
 }
 
 /**
- * The GNSS-blackout trigger/status control, extracted from the old NAVIGATION STATUS card
- * so it can stay visible in both the primary and technical-detail views -- it's a control,
- * not a status readout. Logic and styling are unchanged from before the two-tier redesign.
+ * Motion Mode indicator (§30, NEW) -- the pedestrian-safety fallback (§24/§25) has never been
+ * visible in any prior UI version. A small solid-fill chip, not a full-width card: a supporting
+ * detail alongside the confidence card, not a headline. Blue/car for VEHICLE_MODE (ML+NHC
+ * active, validated domain), amber/walking for CONSERVATIVE_MODE (ML+NHC skipped, bounded
+ * fallback displacement only -- §25) -- amber reused deliberately from the same verified-
+ * contrast palette as confidenceColor()'s "Medium" tier, since both represent a degraded-but-
+ * safe state, not an error.
+ */
+@Composable
+private fun MotionModeBadge(motionMode: String, modifier: Modifier = Modifier) {
+    val isConservative = motionMode == "CONSERVATIVE_MODE"
+    val icon = if (isConservative) "🚶" else "🚗"
+    val label = if (isConservative) "Conservative Mode" else "Vehicle Mode"
+    val color = if (isConservative) Color(0xFFB45309) else Color(0xFF2563EB)
+
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .background(color, shape = RoundedCornerShape(20.dp))
+                .padding(horizontal = 12.dp, vertical = 6.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = icon, fontSize = 13.sp)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = label,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The GNSS-blackout trigger/status control -- a control, not a status readout, so it stays
+ * visible regardless of the technical-details toggle. Two-stage arm-then-confirm to start
+ * (prevents an accidental tap from starting a demo-critical mode), unchanged from prior
+ * sessions.
  */
 @Composable
 private fun BlackoutControlButton(
@@ -820,7 +800,7 @@ private fun MetricTile(title: String, value: String, modifier: Modifier = Modifi
             modifier = Modifier.padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = title, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF64748B))
+            Text(text = title, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF475569))
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = value, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
         }
@@ -829,15 +809,15 @@ private fun MetricTile(title: String, value: String, modifier: Modifier = Modifi
 
 /**
  * Surfaces Android's own magnetometer/rotation-vector reliability signal for heading, so a
- * degraded compass (common inside a vehicle chassis or a tunnel/parking-garage's rebar --
- * exactly this project's blackout scenario) is visible rather than silently assumed fine.
+ * degraded compass (common inside a vehicle chassis or a tunnel/parking-garage's rebar) is
+ * visible rather than silently assumed fine.
  */
 @Composable
 private fun HeadingConfidenceTile(confidence: String, modifier: Modifier = Modifier) {
     val color = when (confidence) {
-        "HIGH" -> Color(0xFF16A34A)
-        "MEDIUM" -> Color(0xFFD97706)
-        else -> Color(0xFFDC2626) // LOW or UNRELIABLE
+        "HIGH" -> Color(0xFF047857)
+        "MEDIUM" -> Color(0xFFB45309)
+        else -> Color(0xFFB91C1C) // LOW or UNRELIABLE
     }
     Card(
         modifier = modifier,
@@ -848,7 +828,7 @@ private fun HeadingConfidenceTile(confidence: String, modifier: Modifier = Modif
             modifier = Modifier.padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Heading Conf.", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF64748B))
+            Text(text = "Heading Conf.", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF475569))
             Spacer(modifier = Modifier.height(4.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(

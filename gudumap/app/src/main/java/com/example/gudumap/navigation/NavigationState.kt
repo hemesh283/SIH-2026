@@ -40,6 +40,8 @@ data class NavigationState(
     val naiveLongitude: Double = 0.0,
     val uncertaintyRadiusMeters: Double = 0.0, // EKF 1-sigma circular position uncertainty
     val headingConfidence: String = "UNRELIABLE", // "HIGH" / "MEDIUM" / "LOW" / "UNRELIABLE" -- Android's own magnetometer/rotation-vector reliability signal
+    val motionMode: String = "VEHICLE_MODE", // "VEHICLE_MODE" / "CONSERVATIVE_MODE" -- pedestrian-safe fallback classification, decided once at blackout entry (PROJECT_STATUS.md §24); UI hookup pending
     val hasGpsFix: Boolean = false, // true once at least one real GNSS fix has ever been obtained this session
+    val isInternetAvailable: Boolean = true, // true when device has active internet, false when offline (merged back from teammate's branch, PROJECT_STATUS.md §26; not yet wired to any producer on this branch -- see NavigationEngine.kt merge decision)
     val timestampNs: Long = System.nanoTime()
 )
