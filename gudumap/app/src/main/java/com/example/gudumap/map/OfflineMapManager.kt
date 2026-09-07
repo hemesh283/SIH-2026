@@ -34,8 +34,14 @@ class OfflineMapManager(private val context: Context) {
         const val COIMBATORE_DEFAULT_LAT = 11.0168
         const val COIMBATORE_DEFAULT_LON = 76.9558
 
+        // §22: MUST match coimbatore.mbtiles' own `metadata` table (minzoom/maxzoom rows) exactly.
+        // Verified directly against the bundled file via sqlite3 -- real data covers zoom 11-16
+        // only (915 tiles: 11=4, 12=12, 13=30, 14=110, 15=399, 16=360; metadata row maxzoom=16).
+        // This constant was previously 17 -- one level past the last real tile -- which let the
+        // map UI zoom into a range with zero data (see MapView.kt's zoom bounds, now derived from
+        // this same constant instead of an independently hardcoded 18.0).
         const val MIN_ZOOM = 11
-        const val MAX_ZOOM = 17
+        const val MAX_ZOOM = 16
 
         // Bounding box for Coimbatore metropolitan area (23.3 km x 20.7 km, ~482 sq km)
         val COIMBATORE_BOUNDS = BoundingBox(11.125, 77.070, 10.915, 76.880)
@@ -164,20 +170,29 @@ class OfflineMapManager(private val context: Context) {
      * This provider contains NO network downloader modules and enforces offline rendering.
      */
     fun createOfflineTileProvider(): MapTileProviderArray? {
-        val file = localMapFile ?: return null
-        if (!file.exists()) return null
+        val file = localMapFile ?: run {
+            Log.e(TAG, "createOfflineTileProvider: no local map file recorded (initializeOfflineMap() never reached copy step)")
+            return null
+        }
+        if (!file.exists()) {
+            Log.e(TAG, "createOfflineTileProvider: local map file does not exist at ${file.absolutePath}")
+            return null
+        }
+        Log.i(TAG, "createOfflineTileProvider: mbtiles file found at ${file.absolutePath} (${file.length() / 1024}KB)")
 
         return try {
             val archive: IArchiveFile? = try {
                 MBTilesFileArchive.getDatabaseFileArchive(file)
             } catch (e: Exception) {
+                Log.w(TAG, "MBTilesFileArchive.getDatabaseFileArchive failed (${e.message}), trying ArchiveFileFactory fallback")
                 ArchiveFileFactory.getArchiveFile(file)
             }
 
             if (archive == null) {
-                Log.e(TAG, "Could not create IArchiveFile from ${file.absolutePath}")
+                Log.e(TAG, "createOfflineTileProvider: could not open ${file.absolutePath} as an MBTiles archive -- both MBTilesFileArchive and ArchiveFileFactory failed")
                 return null
             }
+            Log.i(TAG, "createOfflineTileProvider: MBTiles archive opened successfully ($archive)")
 
             archive.setIgnoreTileSource(true)
 
@@ -197,6 +212,8 @@ class OfflineMapManager(private val context: Context) {
                 arrayOf(archive),
                 true
             )
+
+            Log.i(TAG, "createOfflineTileProvider: ready -- tileCount=$tileCount (from verifyDatabase), zoom range [$MIN_ZOOM, $MAX_ZOOM]")
 
             MapTileProviderArray(
                 offlineTileSource,

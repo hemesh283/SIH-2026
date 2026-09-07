@@ -769,3 +769,197 @@ Since no `.git` exists yet and the instruction was explicitly not to create one,
 ### Not done
 
 No `git init`, `git add`, `git commit`, or `git push` was run, per instruction — the user runs those manually.
+
+---
+
+## 19. 2026-09-07 — Task 1: the §17 fix is genuinely present; Task 2: two-tier UI implemented
+
+### Task 1 — verified the speed-sanitization/blackout-entry fix (§17) is intact, not reverted
+
+A test screenshot reporting DR Distance 366.1m, Duration 00:26, ML Gate A:8 C:5 R:32 was raised again after the fix was supposedly built and tested. Checked directly rather than assumed:
+
+- **Git history exists now** (it didn't in §18 — the user has since run `git init`/`add`/`commit`/`push` themselves): one commit, `b5f5a68`, "Initial commit: gudumap app, ML pipeline, evaluation tooling, and project docs", pushed to `origin/main`, working tree clean.
+- `git show b5f5a68:...DeadReckoningEngine.kt` and the current working-tree file were both grepped for every identifier from §17 (`sanitizeGnssSpeed`, `sanitizeExternalGnssSpeed`, `MAX_SPEED_CHANGE_MPS2`, `blackoutEntrySpeedMps`, `blackoutEntryTimestampNs`) — **all present, identical, in both the commit and the current working tree.** Same check on `NavigationEngine.kt` for `sanitizeExternalGnssSpeed`/`blackoutStartSpeed` — also present and correctly wired in both. Nothing was reverted or lost across the git/`.gitignore` work in §18.
+- **The reported numbers are not new evidence.** `366.1m` / `00:26` / `A:8 C:5 R:32` are an **exact match**, to the decimal, to the pre-fix Finding B data reported and diagnosed two sessions ago (before §17's fix existed). Independent real-world test runs produce continuously-variable sensor-derived numbers — GPS noise, exact button-press timing, and drift accumulation would never coincidentally reproduce identical decimal-precision distance and exact integer gate counts across two genuinely separate tests. The overwhelmingly likely explanation is that this is the **same old screenshot being re-referenced**, not a fresh post-fix result.
+
+**Conclusion, per the task's own decision structure: explanation (2) applies.** The fix code is genuinely present and correct — recommend running a fresh on-device test and comparing the new numbers against 366.1m/00:26/A:8 C:5 R:32 specifically; if the new test produces different numbers (as it should), that confirms the earlier screenshot was stale. If a fresh test somehow reproduces those exact same numbers again, that would be a real anomaly worth escalating back for investigation — but nothing in the code supports that outcome.
+
+### Task 2 — two-tier UI implemented in `ui/screens/NavigationScreen.kt` only
+
+**Primary view (always visible, plain language):**
+- New `StatusBanner` composable — large, centered, colored text: *"Navigating without GPS"* (blackout), *"Reconnecting to GPS…"* (recovery), or *"Navigating with GPS"* (normal). The technical terms (`GNSS BLACKOUT`, `GNSS_RECOVERY`) remain visible in the technical detail view's existing `NAVIGATION STATUS` card, unchanged.
+- The map moved up to be the primary view's centerpiece, directly under the banner — no changes to `MapView.kt`; it already draws the position marker and the uncertainty-radius circle during blackout (from an earlier session), so making it prominent just meant relocating the existing `Card`/`MapView` block earlier in the layout.
+- New `PlainConfidenceCard` — a single "High"/"Medium"/"Low" label, shown only during blackout (mirrors when the numeric Confidence Radius tile is meaningful). Derived by a new `confidenceLevel()` function: **`<5m → High`, `5–15m → Medium`, `>15m → Low`** — explicitly flagged in a code comment and here as a first-pass judgment call, not validated against real measured accuracy data.
+- `BlackoutControlButton` — extracted from the old `NAVIGATION STATUS` card into its own composable, unchanged logic/styling, now always visible regardless of the technical-details toggle (it's a control, not a status readout, per your explicit framing).
+- A single `OutlinedButton` toggling `showTechnicalDetails`, label switching between "Show"/"Hide technical details".
+
+**Technical detail view (collapsed by default, `AnimatedVisibility`):** the GNSS recovery banner, the blackout status card (DR Distance/Max Error/ML Latency/exact Confidence Radius/Heading Conf.), the `NAVIGATION STATUS` card (status rows only, minus the button which moved to the primary view), Position, Navigation Metrics, and Sensor Status — **all unchanged**, just wrapped in `AnimatedVisibility(visible = showTechnicalDetails, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut())` for a clean expand/collapse instead of an abrupt cut.
+
+**Location permission button:** kept always-visible (outside the toggle), by the same "control, not readout" logic applied to the blackout button — not explicitly listed in either tier by the task, but treated consistently with the stated principle.
+
+**One deliberate small change beyond "just move behind the toggle," flagged for visibility:** the old header's small "GNSS"/"DEAD RECKONING" mode badge was removed rather than relocated into the technical view. The same information is still fully available via the "Navigation" status row in the technical detail view (`GNSS` vs `DR`) — it was redundant with that row, not lost functionality — but it's a real behavior difference from a literal "move everything, remove nothing" reading of the instruction, so it's called out here rather than left silent. Easy to restore in the header or technical view if you'd rather keep it.
+
+**Scope discipline confirmed:** only `ui/screens/NavigationScreen.kt` was touched. `DeadReckoningEngine.kt`, `NavigationEngine.kt`, `MapView.kt`, and every other file with fixed logic from prior sessions are untouched — grepped to confirm no other file was modified this session.
+
+**One specific build risk to flag, not a general disclaimer:** this file now imports from `androidx.compose.animation` (`AnimatedVisibility`, `expandVertically`, `shrinkVertically`, `fadeIn`, `fadeOut`) for the first time. `app/build.gradle.kts` doesn't declare that artifact explicitly — it's expected to resolve transitively through the already-declared `androidx.compose.material3` dependency (a very standard, widely-relied-upon transitive relationship in real Compose projects), but this hasn't been confirmed by an actual build in this environment. **If the Android Studio sync produces an unresolved-reference error on `AnimatedVisibility` specifically, that's the fix: add `implementation(libs.androidx.compose.animation)` (or the equivalent BOM-managed coordinate) to `app/build.gradle.kts`.** Every other import in this file is unchanged from before.
+
+### Still not build-tested
+
+Same standing caveat as every session — no working Gradle build in this environment. Verified by re-reading the full file for structural correctness (brace balance, no orphaned blocks, all existing composables untouched) and by direct git/file-content comparison for Task 1, not by compiling or running either change. Needs an Android Studio sync (watch specifically for the animation-dependency risk above) and an on-device retest — both for a fresh blackout-test result to compare against the suspect 366.1m/00:26/A:8 C:5 R:32 numbers, and to confirm the new two-tier UI actually expands/collapses correctly and looks right on a real screen.
+
+---
+
+## 20. 2026-09-07 (continued) — URGENT: map glitch in Coimbatore — investigated, §19 exonerated, real bug found and fixed in MapView.kt
+
+A live test in Coimbatore (real GPS fix obtained) reported the map glitching/broken after §19's two-tier rewrite. Investigated the diff first, per instruction, before touching any code.
+
+### Investigation — §19's diff is not the cause
+
+- `git diff HEAD -- .../MapView.kt` returned **zero lines** — the file was never touched by §19. Its lifecycle handling (`AndroidView` factory/update, no explicit `onDispose`) is identical to before.
+- The `MapView(...)` call site in `NavigationScreen.kt` — every parameter, same list, same order — is **byte-identical** to the pre-§19 version (`git show HEAD:...` compared line-by-line). Its wrapping `Card`/`Column` modifiers are also byte-identical.
+- The map's composable call is unconditional (not inside an `if`/`AnimatedVisibility`) in **both** versions — its position in Compose's composition identity didn't become newly conditional, ruling out the "AndroidView got recreated due to slot-table instability" theory.
+- The only real structural difference: the map now sits near the top of the screen instead of after four other cards, so it's visible immediately without scrolling.
+
+**Conclusion: §19 introduced no map-related regression.** Re-read `MapView.kt` itself fresh instead, and found a real, pre-existing bug (confirmed present in the last commit too, so it predates §19 entirely) — simply never observed before because the map used to be scrolled out of view during normal (non-blackout) operation.
+
+### The real bug, found and fixed
+
+`MapView.kt`'s "corrected" (blue, GRU+EKF+ZUPT) trail was **never gated on `blackoutMode`** — unlike the naive (red) trail right next to it, which always was:
+```kotlin
+// BEFORE — ran on every update() tick, unconditionally:
+correctedTrail.add(currentPoint)
+if (correctedTrail.size > MAX_TRAIL_POINTS) correctedTrail.removeAt(0)
+...
+correctedPolyline.setPoints(correctedTrail)   // drawn at all times, even outside blackout
+```
+This meant a thick (7dp-stroke) blue polyline accumulated and drew continuously during **all** operation, including plain GNSS-available GPS testing — growing an ever-longer trail tracing ordinary GPS jitter with no gating, which is exactly what a "glitching" map would look like during a normal fix-acquisition test. A secondary, lower-confidence contributor: `map.controller.animateTo(currentPoint)` restarted a smooth-pan camera animation on every ~80ms tick, never letting the previous one finish.
+
+**Fixed, `MapView.kt` only (confirmed via `git status` — `NavigationScreen.kt`'s diff is unchanged from §19, not touched again this session):**
+1. Corrected-trail accumulation now gated identically to the naive trail: `if (blackoutMode) { correctedTrail.add(...); trim }`.
+2. Corrected-trail display now gated identically too: `correctedPolyline.setPoints(if (blackoutMode) correctedTrail else emptyList())`.
+3. `map.controller.animateTo(currentPoint)` → `map.controller.setCenter(currentPoint)` — instant recenter, no animation to restart.
+
+**Confirmed the fix exactly mirrors the naive trail's existing pattern, not just similar:** both trails now share the identical accumulation gate (`if (blackoutMode) { add; trim }`), identical display gate (`if (blackoutMode) trail else emptyList()`), and the pre-existing shared clear-on-blackout-start block (`if (blackoutMode && !wasBlackout.value) { correctedTrail.clear(); naiveTrail.clear() }`, untouched by this fix, already applied to both symmetrically).
+
+### Explicit trace-through, both scenarios, as asked
+
+**Normal (non-blackout) operation, real fix:** `blackoutMode` is `false` throughout → neither trail ever accumulates → both `setPoints(...)` calls resolve to `emptyList()` regardless of trail contents → no uncertainty circle (`if (blackoutMode && ...)`, already false) → `setCenter()` instantly places the camera on the real position every tick with nothing left to restart-and-jitter. **Result: just the position marker, correctly placed and rotated, no trail of either color, no circle, no camera jitter** — exactly what was asked.
+
+**Blackout active:** on the first tick after `blackoutMode` flips true, the pre-existing clear-block fires (`!wasBlackout.value` was true) — both trails reset to empty together. From that same tick onward, both accumulation gates are now true → both trails grow in lockstep, each starting cleanly from the blackout-entry position — corrected (blue) tracing the fused GRU+EKF+ZUPT path, naive (red) tracing the uncorrected double-integration path, exactly the contrastive visual Task D originally intended. The uncertainty circle continues to grow around the corrected position unaffected (untouched by this fix). **Result: both trails render and update correctly together, matching Task D's original design** — arguably more faithfully than before, since the corrected trail previously carried pre-blackout clutter into its blackout-time display; now it starts as cleanly as the naive trail always did.
+
+### Still not build-tested
+
+Same standing caveat. Verified by re-reading the full updated file and by the explicit trace above, not by compiling or running it. Needs an Android Studio sync and an on-device retest in Coimbatore specifically re-checking: normal GPS operation shows a clean map with no trail, and triggering a blackout shows both trails growing correctly from that point onward.
+
+## 21. 2026-09-07 (continued) — URGENT: "API KEY REQUIRED" / carto.com watermark in Coimbatore — no Carto reference anywhere in our code; fixed the real mechanism (a network-capable fallback tile source) in MapView.kt
+
+A live Coimbatore test showed map tiles overlaid with a repeated "API KEY REQUIRED" watermark and "carto.com/basemap-styles" text, over a faint basemap. Hypothesis to check: the app is hitting an online Carto tile source needing a key it lacks, instead of the bundled offline `coimbatore.mbtiles` (13.86MB, real OSM data, 482km² coverage, zoom 11–17, confirmed present since §16/§18).
+
+### Task 1 — where is the tile source actually configured, and is coimbatore.mbtiles even in the code path?
+
+- `grep -rn "carto|Carto|CARTO|TileSourceFactory|MAPNIK|API_KEY|apikey|api_key" gudumap/app/src` → **zero matches**. There is no Carto URL, no API key string, no reference to osmdroid's `TileSourceFactory` defaults (which is where `MAPNIK`, an online CartoDB-style source, normally lives) anywhere in gudumap's own Kotlin source.
+- `OfflineMapManager.kt` (`gudumap/app/src/main/java/com/example/gudumap/map/OfflineMapManager.kt`) does try to load the bundled mbtiles: `initializeOfflineMap()` resolves the asset at `maps/coimbatore/coimbatore.mbtiles` (confirmed present), copies it synchronously to `filesDir` on first run, and `createOfflineTileProvider()` builds an `XYTileSource("CoimbatoreOffline", MIN_ZOOM=11, MAX_ZOOM=17, ...)` backed by `MBTilesFileArchive`/`ArchiveFileFactory` over that local file — genuinely offline, no base URL that could ever reach `carto.com`.
+- The bug was in `MapView.kt`'s factory block (`gudumap/app/src/main/java/com/example/gudumap/ui/components/MapView.kt`), in the branch taken when `createOfflineTileProvider()` returns **null**:
+  ```kotlin
+  // BEFORE:
+  val mapView = if (tileProvider != null) {
+      OsmMapView(context, tileProvider)
+  } else {
+      OsmMapView(context)   // <-- bare constructor
+  }
+  ```
+  A bare `OsmMapView(context)` with no tile source assigned falls back to osmdroid's own built-in default, which is an **online** CartoDB-based source (this is where the "carto.com/basemap-styles" / "API KEY REQUIRED" watermark comes from — it's osmdroid's own stock unregistered-tile-provider placeholder, not anything gudumap wrote). `setUseDataConnection(false)` is called later in the shared `.apply {}` block, but that's a data-plane content policy, not a proof the map never *tries* to construct a request from an online-shaped tile source.
+
+**Definitive answer to Task 1: not "using online Carto tiles by explicit choice" — gudumap's code never references Carto at all. The actual mechanism is osmdroid's own default fallback, reached only when the offline mbtiles provider fails to construct and the old code path did nothing to prevent an online-capable substitute.** Whether `coimbatore.mbtiles` is "unused dead weight" like `gru_local.onnx` (§ earlier) or genuinely wired up but failing at runtime could not be fully distinguished by static reading alone — `OfflineMapManager.createOfflineTileProvider()` checks only `localMapFile != null && file.exists()`, **not** `status` (which `verifyDatabase()` may have set to `ERROR`) — so it's structurally plausible for the function to still attempt construction even after a failed verification, and only return null if that attempt itself throws. Pinning down *why* it returns null on the real device (main-thread copy timing, an `MBTilesFileArchive` construction failure, or a device-side file issue) needs the new logging below and an on-device logcat — not claimed as solved here.
+
+### Task 2 — fix implemented in `MapView.kt` only
+
+Replaced the risky fallback with an explicitly no-network `XYTileSource`, so there is no code path left in gudumap that can ever construct an online tile request, regardless of why the offline provider failed:
+```kotlin
+val noNetworkSource: ITileSource = XYTileSource(
+    "GudumapNoNetwork", OfflineMapManager.MIN_ZOOM, OfflineMapManager.MAX_ZOOM,
+    256, ".png", emptyArray()   // zero base URLs -- no address to even attempt
+)
+OsmMapView(context).apply { setTileSource(noNetworkSource) }
+```
+Also added `Log.i`/`Log.w` (tag `Gudumap:MapView`) in both branches reporting `offlineManager.getOfflineMapStatusString()` and `getTileCount()`, so the next on-device logcat will show definitively whether the offline provider succeeded or failed, and (via `OfflineMapManager`'s own pre-existing `Log.e` calls) why.
+
+**Confirmed achievable with what's already bundled, and reported honestly:**
+- **The Carto watermark specifically is now impossible** — `emptyArray()` base URLs means osmdroid has no address to construct any network request from, in either branch.
+- **This does not by itself guarantee `coimbatore.mbtiles` renders.** Two real outcomes on the next on-device test: (a) if `createOfflineTileProvider()` was actually succeeding and the watermark had some other cause, this fix doesn't change anything — but no evidence for that was found; or (b), consistent with all evidence gathered, if the offline provider was genuinely failing, the map will now show **blank/no tiles** (the vector road overlay and position marker still render on top, since those don't depend on the raster tile source) instead of the watermark — progress (no more misleading online placeholder) but not full resolution until the new logs reveal why the offline provider fails and that's fixed too.
+- If it does work, expected visual quality is genuine 2D OSM road/street rendering matching the pre-generated `coimbatore.mbtiles` content (real Coimbatore streets) — explicitly **not** Google Maps-style satellite imagery or 3D buildings, which was never built and is out of scope.
+
+**Trace-through, as this project's convention requires:** with `tileProvider == null`, `mapView` is built via the new branch → `noNetworkSource` has `emptyArray()` base URLs → osmdroid's tile loader has no URL template to fill in for any tile request → no HTTP request of any kind is ever issued → the "API KEY REQUIRED"/carto.com watermark (which requires reaching osmdroid's *built-in default* source, never touched now) cannot appear under any circumstance. The shared `mapView.apply {}` block (multi-touch, `setUseDataConnection(false)`, zoom bounds, initial center, road overlay, marker) runs identically regardless of which branch produced `mapView`, unchanged by this fix.
+
+### Scope discipline
+
+Confirmed via `git status --short`: this session's diff is `MapView.kt` only (imports + `TAG` constant + the fallback branch + two `Log` calls), plus this `docs/PROJECT_STATUS.md` entry. `OfflineMapManager.kt` and `NavigationScreen.kt` were read for context but not modified.
+
+### Still not build-tested
+
+Same standing caveat — no code-execution errors are possible to hit in this sandboxed environment (Gradle daemon startup fails here regardless of flags tried; see earlier sessions). Needs an Android Studio sync and an on-device retest in Coimbatore, specifically checking logcat (tag `Gudumap:MapView`, plus `OfflineMapManager`'s own tag) for whether the offline branch or the no-network branch was taken, and confirming visually: no watermark in either case, and (if the offline branch was taken) real OSM road tiles rendering under the vector overlay and marker.
+
+## 22. 2026-09-07 (continued) — offline map failed across repeated attempts: verified the foundation directly against real osmdroid source + the real bundled file, found and fixed an actual zoom-ceiling mismatch (not a rewrite — the existing approach was already correct)
+
+After §21's fix, the offline map reportedly still failed to render correctly (watermark still appearing, or blank map, across attempts). Instructed to stop patching symptoms and verify the foundation: is `OfflineMapManager.kt` really using osmdroid's own built-in MBTiles support correctly, or is this hand-rolled?
+
+### Task 1 — verified against the real osmdroid 6.1.20 library source and the real bundled file, not memory or assumption
+
+The project's Gradle cache already had osmdroid 6.1.20's actual sources jar downloaded (`~/.gradle/caches/modules-2/.../osmdroid-android-6.1.20-sources.jar`). Extracted and read the real source for every class involved, instead of relying on recalled API shape:
+
+1. **`OfflineMapManager.createOfflineTileProvider()` genuinely uses osmdroid's own built-in offline-MBTiles classes** — `MBTilesFileArchive.getDatabaseFileArchive()`, `ArchiveFileFactory.getArchiveFile()` (fallback), `MapTileFileArchiveProvider`, `MapTileProviderArray`, `SimpleRegisterReceiver` — not hand-rolled, not a custom `XYTileSource` pointing at a local file path masquerading as offline support. Verified every constructor call site against the actual source and confirmed all signatures match exactly (no compile-signature mismatch, e.g. `MapTileFileArchiveProvider`'s 4-arg `(receiver, tileSource, archives, ignoreTileSource: Boolean)` constructor genuinely exists).
+2. **Matches osmdroid's own documented pattern** for MBTiles offline serving (dummy `ITileSource` for zoom range + drawable decoding, real tile bytes served via the archive's own SQL lookup, not via any URL). One harmless cargo-culted no-op found: `archive.setIgnoreTileSource(true)` — `MBTilesFileArchive.setIgnoreTileSource()` is an **empty no-op method** in this osmdroid version (confirmed by reading `MBTilesFileArchive.java`); harmless because the tile query (`WHERE tile_column=? AND tile_row=? AND zoom_level=?`) never filters by tile-source name anyway.
+3. **`setUseDataConnection(false)` (already present in `MapView.kt`, both branches, both factory and update blocks) is a real, request-routing-level guarantee, confirmed by reading the dispatch code itself**: `MapTileProviderArray.findNextAppropriateProvider()` explicitly disqualifies any provider whose `getUsesDataConnection()==true` whenever `useDataConnection()==false` — traced the call chain `MapView.setUseDataConnection()` → `TilesOverlay.setUseDataConnection()` → `MapTileProviderBase.setUseDataConnection()`, confirmed it reaches the actual live provider instance, not a copy. This means even §21's fallback branch's residual `MapTileDownloader` module (present because a bare `OsmMapView(context)` always builds a full `MapTileProviderBasic` internally, which always includes a downloader) can **never be dispatched to** — not just "would fail to build a URL," but structurally skipped before that. `Configuration.getInstance()`'s base path isn't explicitly set, but doesn't matter: `findArchiveFiles()` (the only place that reads it) is never invoked, since explicit archives are passed to `MapTileFileArchiveProvider`, bypassing directory-scan entirely.
+
+**Verdict: this is not hand-rolled logic in need of a rewrite. It already correctly uses osmdroid's real built-in offline tooling, matching the documented pattern.**
+
+### The real bug — directly inspected the bundled file itself, independent of any Android/osmdroid code
+
+Rather than keep reasoning about the Kotlin code in isolation, opened the actual bundled `coimbatore.mbtiles` with plain `sqlite3` (zero Android dependency — this cannot be wrong about what's really in the file):
+```
+$ sqlite3 coimbatore.mbtiles ".schema"
+CREATE TABLE metadata (name text, value text);
+CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob);
+CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);
+
+$ sqlite3 coimbatore.mbtiles "SELECT zoom_level, COUNT(*) FROM tiles GROUP BY zoom_level;"
+11|4
+12|12
+13|30
+14|110
+15|399
+16|360
+
+$ sqlite3 coimbatore.mbtiles "SELECT * FROM metadata;"
+...
+minzoom|11
+maxzoom|16
+
+$ sqlite3 coimbatore.mbtiles "SELECT quote(substr(tile_data,1,8)) FROM tiles LIMIT 3;"
+X'89504E470D0A1A0A'   -- genuine PNG magic bytes, on every sample checked
+```
+This confirms: the schema is exactly standard MBTiles (matches what `MBTilesFileArchive` expects), the file is not corrupt, and the tile blobs are genuine PNG images, not placeholder/error text. **915 real tiles exist, covering zoom 11 through 16 — and the file's own `metadata` table says so explicitly (`maxzoom=16`).**
+
+But: `OfflineMapManager.MIN_ZOOM/MAX_ZOOM` was `11`/**`17`** (one level past the last real tile), and `MapView.kt` separately hardcoded `minZoomLevel = 11.0` / `maxZoomLevel = `**`18.0`** (a *third*, independently-hardcoded ceiling, two levels past the last real tile). Both were out of sync with the file's own stated `maxzoom=16` — nobody had ever cross-checked the code's zoom constants against the real data the file actually contains.
+
+**This is the smoking gun for the "blank map" outcomes, independent of the watermark issue already fixed in §21.** A live test naturally involves pinch-zooming in to check for street-level detail — the single most natural verification action a tester would take — and doing so past zoom 16 lands in a range with **zero tile rows in the archive**, which `MBTilesFileArchive.getInputStream()` correctly reports as "no tile" (returns null, not an exception) for every request at that zoom. In the working offline branch there's no approximation/stretch-from-lower-zoom fallback (that only exists in `MapTileProviderBasic`'s full chain, not in our lean archive-only `MapTileProviderArray`) — so overzooming past 16 renders **fully blank**, which looks exactly like "the offline map isn't working," even on a device where the offline provider loaded perfectly correctly.
+
+### Task 2 — fixed: aligned the zoom ceiling to the real data, single source of truth, plus explicit step-by-step init logging
+
+1. **`OfflineMapManager.kt`**: `MAX_ZOOM` corrected from `17` → `16`, with a comment recording the exact tile-count-by-zoom breakdown and instruction to keep this in sync with the file's own `metadata` table if it's ever regenerated.
+2. **`MapView.kt`**: `minZoomLevel`/`maxZoomLevel` no longer independently hardcoded (`11.0`/`18.0`) — now read from `OfflineMapManager.MIN_ZOOM.toDouble()`/`MAX_ZOOM.toDouble()`, the same constants the tile source itself is built from, so this exact category of drift (UI allows a zoom the data doesn't have) can't silently reappear.
+3. **`OfflineMapManager.createOfflineTileProvider()`**: added the three explicit init-step logs asked for — mbtiles file found (path + size), archive opened successfully, and a final "ready" log with tile count and zoom range — plus a specific failure-reason log on each of the two ways archive construction can fail (`MBTilesFileArchive` throwing vs. both it and `ArchiveFileFactory` returning null), so a real device's logcat will show exactly which step failed if the offline branch is ever hit again.
+
+**Confirmed achievable with what's already bundled, honestly assessed:** this is a 3-line constant/wiring fix, not a rewrite — the underlying approach was already correct. With it, zoom is capped at 16 everywhere (matching the real data exactly), so overzoom-into-blank can no longer happen; genuine 2D OSM road rendering for Coimbatore should be visible across the full 11-16 range the data actually covers. Explicitly not fixed and out of scope: there is no data beyond zoom 16 to show, so extremely close street-level zoom (17+) will simply stop responding to further pinch-in past 16 (correct behavior now, not a bug) rather than ever attempting to render nonexistent detail.
+
+### Task 3 — decision point: stay on osmdroid, do not switch libraries
+
+High confidence, not hedged: **do not switch to MapLibre Native or another library.** Every piece of evidence gathered this session points the same way — osmdroid's own MBTiles support is being used correctly (verified against its real source, not assumed), the documented pattern is matched, the actual bundled data is genuine and valid (verified independently via sqlite3), and the two real bugs found across this and the prior session (§21's unsafe online fallback, §22's zoom-ceiling mismatch) were both small, mechanical, well-evidenced fixes — not symptoms of a library limitation. A library migration at this stage would be a much larger, riskier rewrite in exchange for re-solving a problem that turns out to already be solved by osmdroid's existing, mature offline tooling. The one thing still unverifiable from here (no build environment) is watching the on-device asset copy and `verifyDatabase()` actually run and log `AVAILABLE` — but that's a much narrower, better-characterized unknown than before this session, not a reason to abandon the approach.
+
+### Scope discipline
+
+Confirmed via `git status --short`: this session's diff is `OfflineMapManager.kt` and `MapView.kt` (both expected, since the zoom-ceiling fix necessarily touches both the constant's definition and its UI consumer), plus this `docs/PROJECT_STATUS.md` entry. `NavigationScreen.kt`'s diff is unchanged, pre-existing from §19 — not touched again.
+
+### Still not build-tested
+
+Same standing caveat as every session — no Gradle build is runnable in this sandboxed environment. Needs an Android Studio sync and an on-device retest in Coimbatore, checking logcat for the new step-by-step `Gudumap:OfflineMap` logs (file found → archive opened → ready, tile count + zoom range) to confirm `AVAILABLE` is actually reached, and confirming visually: real OSM roads render across the full zoom range (pinch from wide-area down to street-level detail, stopping naturally at 16 with no blank overzoom), no watermark anywhere.

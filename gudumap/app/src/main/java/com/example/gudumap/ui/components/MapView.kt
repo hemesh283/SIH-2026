@@ -2,6 +2,7 @@ package com.example.gudumap.ui.components
 
 import android.content.Context
 import android.graphics.Color as AndroidColor
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -14,6 +15,8 @@ import androidx.core.content.ContextCompat
 import com.example.gudumap.R
 import com.example.gudumap.map.MapMatcher
 import com.example.gudumap.map.OfflineMapManager
+import org.osmdroid.tileprovider.tilesource.ITileSource
+import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView as OsmMapView
 import org.osmdroid.views.overlay.FolderOverlay
@@ -22,6 +25,7 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.Polyline
 
 private const val MAX_TRAIL_POINTS = 2000
+private const val TAG = "Gudumap:MapView"
 
 @Composable
 fun MapView(
@@ -52,17 +56,46 @@ fun MapView(
             val tileProvider = offlineManager.createOfflineTileProvider()
 
             val mapView = if (tileProvider != null) {
+                Log.i(TAG, "Offline tile provider ready (status=${offlineManager.getOfflineMapStatusString()}, " +
+                    "tiles=${offlineManager.getTileCount()}) -- using bundled coimbatore.mbtiles")
                 OsmMapView(context, tileProvider)
             } else {
-                OsmMapView(context)
+                // STRICT OFFLINE (§21 fix): this branch previously constructed a bare
+                // OsmMapView(context), which falls back to osmdroid's own built-in default
+                // tile source -- an ONLINE provider. That's what was actually reaching the
+                // network and rendering a "API KEY REQUIRED" Carto watermark instead of the
+                // bundled offline map: the offline archive failed to load (see the logged
+                // reason below / OfflineMapManager's own Log.e calls for why), and nothing
+                // stopped the fallback from being network-capable. Never let that happen
+                // again regardless of why the offline archive failed: explicitly assign a
+                // tile source with zero base URLs, so there is no address for osmdroid to
+                // even construct a network request from.
+                Log.w(TAG, "Offline tile provider unavailable (status=${offlineManager.getOfflineMapStatusString()}) " +
+                    "-- rendering with no base tiles; NOT falling back to any online source")
+                val noNetworkSource: ITileSource = XYTileSource(
+                    "GudumapNoNetwork",
+                    OfflineMapManager.MIN_ZOOM,
+                    OfflineMapManager.MAX_ZOOM,
+                    256,
+                    ".png",
+                    emptyArray()
+                )
+                OsmMapView(context).apply {
+                    setTileSource(noNetworkSource)
+                }
             }
 
             mapView.apply {
                 setMultiTouchControls(true)
                 // STRICT OFFLINE: Disable all network data connections
                 setUseDataConnection(false)
-                minZoomLevel = 11.0
-                maxZoomLevel = 18.0
+                // §22 fix: these previously were independently hardcoded (11.0 / 18.0), out of
+                // sync with the actual bundled data (verified via sqlite3 against coimbatore.mbtiles
+                // itself: real tile data only covers zoom 11-16). 18.0 let users pinch-zoom two
+                // levels past the last real tile -- a guaranteed blank map at that zoom, easily
+                // mistaken for the offline map "not working" at all. Single source of truth now.
+                minZoomLevel = OfflineMapManager.MIN_ZOOM.toDouble()
+                maxZoomLevel = OfflineMapManager.MAX_ZOOM.toDouble()
                 controller.setZoom(15.5)
 
                 val initialPoint = if (latitude > 1.0 && longitude > 1.0) {
@@ -133,8 +166,14 @@ fun MapView(
             }
             wasBlackout.value = blackoutMode
 
-            correctedTrail.add(currentPoint)
-            if (correctedTrail.size > MAX_TRAIL_POINTS) correctedTrail.removeAt(0)
+            // Corrected trail only accumulates during blackout (matches the naive trail's
+            // existing gating below) -- previously unconditional, so it drew and grew a
+            // thick blue polyline continuously even during normal GPS operation (found
+            // while investigating a map glitch report, PROJECT_STATUS.md §20).
+            if (blackoutMode) {
+                correctedTrail.add(currentPoint)
+                if (correctedTrail.size > MAX_TRAIL_POINTS) correctedTrail.removeAt(0)
+            }
 
             if (blackoutMode) {
                 val naivePoint = if (naiveLatitude > 1.0 && naiveLongitude > 1.0) {
@@ -169,7 +208,8 @@ fun MapView(
                 map.overlays.remove(existingMarker)
             }
 
-            // Corrected (GRU+EKF+ZUPT) trail -- blue.
+            // Corrected (GRU+EKF+ZUPT) trail -- blue, only shown once a blackout has
+            // started, matching the naive trail's own gating immediately below (§20 fix).
             val correctedPolyline = map.overlays
                 .filterIsInstance<Polyline>()
                 .firstOrNull { it.id == "corrected_trail" }
@@ -179,7 +219,7 @@ fun MapView(
                     it.outlinePaint.strokeWidth = 7f
                     map.overlays.add(0, it) // beneath the road overlay/marker
                 }
-            correctedPolyline.setPoints(correctedTrail)
+            correctedPolyline.setPoints(if (blackoutMode) correctedTrail else emptyList())
 
             // Naive (uncorrected double-integration) trail -- red, only exists once a
             // blackout has started, so the contrast only appears when it's meaningful.
@@ -212,7 +252,10 @@ fun MapView(
                 uncertaintyCircle.setPoints(emptyList())
             }
 
-            map.controller.animateTo(currentPoint)
+            // Instant recenter, not an animated pan -- animateTo() was restarting a smooth-pan
+            // animation on every ~80ms tick (never letting the previous one finish), a likely
+            // contributor to visible camera jitter (§20 fix).
+            map.controller.setCenter(currentPoint)
             map.invalidate()
         }
     )
