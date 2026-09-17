@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -302,6 +305,7 @@ fun MapView(
         Surface(
             modifier = Modifier
                 .align(Alignment.TopStart)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(start = if (isExpanded) 62.dp else 12.dp, top = 12.dp),
             shape = RoundedCornerShape(20.dp),
             color = Color(0xEE0F172A),
@@ -331,6 +335,7 @@ fun MapView(
         Surface(
             modifier = Modifier
                 .align(Alignment.TopEnd)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(12.dp),
             shape = RoundedCornerShape(20.dp),
             color = Color(0xEE0F172A),
@@ -353,6 +358,7 @@ fun MapView(
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomStart)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(12.dp)
                 .clickable {
                     val currentPoint = if (latitude > 1.0 && longitude > 1.0) {
@@ -388,6 +394,7 @@ fun MapView(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally

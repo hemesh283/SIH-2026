@@ -1312,3 +1312,38 @@ Confirmed via a whitespace/line-ending-insensitive `diff` directly against the t
 ### Still not build-tested
 
 Same standing caveat as every session. Needs an Android Studio sync and an on-device pass checking specifically: all six layout sections render in the right order and states; the Motion Mode badge appears only during blackout and switches between "🚗 Vehicle Mode" and "🚶 Conservative Mode" correctly across a vehicle-speed test and a walking test (the two scenarios §24's classifier was designed to distinguish); the full-screen map expand/shrink still works via MapView's own floating button with the drawer-opening hamburger removed; and the technical details section's new Internet row reflects real connectivity changes once the `NavigationEngine.kt` auto-blackout feature (§27) is exercised.
+
+## 31. 2026-09-18 — closed `MapView.kt`'s WindowInsets gap: its four floating corner controls now apply `.windowInsetsPadding(WindowInsets.safeDrawing)`, matching `NavigationScreen.kt`'s existing fix
+
+### Why this was flagged
+
+A prior session verified `NavigationScreen.kt`'s floating overlays (`TopStatusPill`, `PermissionBanner`, `BlackoutFab`, `DetailsDrawer`) all correctly chain `.windowInsetsPadding(WindowInsets.safeDrawing)` before their own fixed `.padding(...)` -- confirmed again this session by direct re-read of `NavigationScreen.kt`, unchanged. That work explicitly excluded `MapView.kt` as separate map-engine work. Checking `MapView.kt` on its own this session (`grep -n "WindowInsets\|windowInsetsPadding\|safeDrawing\|systemBars"`) returned **zero matches** before this fix -- none of its own floating controls had any inset awareness at all, despite sitting in the identical full-bleed, edge-to-edge layout (`MainActivity.kt` calls `enableEdgeToEdge()`; `NavigationScreen.kt` composes `MapView(..., isExpanded = true, modifier = Modifier.fillMaxSize())`) that made the `NavigationScreen.kt` fix necessary in the first place.
+
+### The four elements fixed
+
+All identified by reading `MapView.kt`'s "FLOATING MAP OVERLAY CONTROLS" block (its own comment heading) top to bottom -- each is a `Surface`/`Column` positioned with `.align(...)` directly on the full-bleed `Box`, exactly the shape of overlay `NavigationScreen.kt`'s fix already targets:
+
+1. **Top-left** -- the "COIMBATORE OFFLINE" status badge (`Alignment.TopStart`), previously `.padding(start = if (isExpanded) 62.dp else 12.dp, top = 12.dp)` with nothing ahead of it. At risk of sitting under the status bar or a display cutout/notch.
+2. **Top-right** -- the heading compass pill (`Alignment.TopEnd`, "🧭 {deg}°"), previously `.padding(12.dp)` alone. Same status-bar/cutout risk as #1.
+3. **Bottom-left** -- the "📍 MY LOCATION" action pill (`Alignment.BottomStart`), previously `.padding(12.dp)` before its own `.clickable {}`. At risk of sitting under a 3-button or gesture navigation bar.
+4. **Bottom-right** -- the `Column` holding the enlarge/recenter/zoom-in/zoom-out button stack (`Alignment.BottomEnd`), previously `.padding(12.dp)` alone. Same nav-bar risk as #3; fixed once on the `Column` itself (the shared floating element for that corner), not on each inner `Surface` individually -- the same granularity `NavigationScreen.kt`'s `DetailsDrawer` fix uses for its own multi-child card.
+
+Each got exactly one line inserted, `.windowInsetsPadding(WindowInsets.safeDrawing)`, positioned before the element's existing fixed `.padding(...)` -- the identical ordering `NavigationScreen.kt` already uses, so the fixed dp padding still applies as a minimum gap *inside* whatever the system inset turns out to be, rather than being replaced by it. Three new imports added to match (`androidx.compose.foundation.layout.WindowInsets`, `.safeDrawing`, `.windowInsetsPadding`) -- the same three `NavigationScreen.kt` already carries.
+
+### Restraint honored
+
+No visual styling, colors, sizes, shapes, elevations, or click/callback behavior touched on any of the four elements -- confirmed by re-reading the diff context around each edit: every changed hunk is a single inserted line, nothing else in any of the four `Surface`/`Column` blocks was rewritten. `isExpanded`'s existing conditional start-padding on the top-left badge (`if (isExpanded) 62.dp else 12.dp`) is preserved verbatim, now simply preceded by the inset padding rather than replaced by it. The `AndroidView` (the actual osmdroid map surface) and every `update`/`factory` block logic for markers, trails, the uncertainty circle, and the pinpoint ring are untouched.
+
+### Verification
+
+Confirmed via `grep -n "windowInsetsPadding\|safeDrawing\|WindowInsets" MapView.kt` post-edit: exactly 4 usage sites (lines 308, 338, 361, 397) plus the 3 import lines, one per floating element, none duplicated or missed.
+
+**Compilation not verified by an actual compiler** -- attempted `./gradlew :app:compileDebugKotlin` (both with and without `--offline`) and both runs failed identically with `java.io.IOException: Unable to establish loopback connection`, the same Gradle daemon/sandbox network restriction documented throughout this file's prior sessions (e.g. §26-30's "Still not build-tested" caveats). Correctness here rests on: (a) the change being a mechanical, byte-for-byte repeat of a pattern already proven to compile and work in `NavigationScreen.kt` (same imports, same modifier-chain shape, same API), and (b) manual re-reading of each edited modifier chain to confirm brace/paren balance and correct chain ordering (`.align(...)` then `.windowInsetsPadding(...)` then the pre-existing `.padding(...)`/`.clickable(...)`).
+
+### Scope discipline
+
+This session's only diff is `MapView.kt`: 3 import insertions + 4 one-line `.windowInsetsPadding(WindowInsets.safeDrawing)` insertions, 7 lines total. `NavigationScreen.kt` was opened read-only (to confirm the exact pattern to replicate) and is unmodified. No other file touched.
+
+### Still not verified on-device
+
+Same standing caveat as every session in this file. Needs an Android Studio sync (blocked in this sandbox by the same loopback restriction as always) and a real-device or emulator pass on a phone with a display cutout/notch and with both 3-button and gesture navigation enabled, checking specifically that: the top-left/top-right corner controls clear the status bar and any cutout in both the compact and `isExpanded=true` full-bleed map states, and the bottom-left pill and bottom-right button stack clear the navigation bar in both navigation-gesture modes -- the exact two failure modes this fix targets, neither of which has been visually confirmed.
